@@ -1,4 +1,4 @@
-import { Skeleton } from '../ui/Skeleton';
+import { Skeleton } from '../ui/Skeleton/Skeleton';
 import './ProductCardSkeleton.css';
 
 export function ProductCardSkeleton() {

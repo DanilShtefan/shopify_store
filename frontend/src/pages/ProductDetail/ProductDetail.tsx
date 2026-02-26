@@ -1,9 +1,10 @@
 import { useParams } from 'react-router-dom';
-import { useProduct } from '../hooks/useProducts';
+import { useProduct } from '../../hooks/useProducts';
 import './ProductDetail.css';
-import { useCart } from '../hooks/useCart';
-import { BackButton } from '../components/ui/BackButton';
-import { Button } from '../components/ui/Button';
+import { useCart } from '../../hooks/useCart';
+import { BackButton } from '../../components/ui/BackButton/BackButton';
+import { Button } from '../../components/ui/Button/Button';
+import { ProductDetailSkeleton } from './ProductDetailSkeleton';
 
 export function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -21,7 +22,7 @@ export function ProductDetail() {
   };
 
   if (loading) {
-    return <div className="loading">Загрузка...</div>;
+    return <ProductDetailSkeleton />;
   }
 
   if (error || !product) {

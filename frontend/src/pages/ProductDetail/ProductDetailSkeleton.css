@@ -1,0 +1,12 @@
+.product-detail-image-skeleton {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.product-detail-info-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}

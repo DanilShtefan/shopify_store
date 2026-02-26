@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import './Header.css';
-import { useCart } from '../../hooks/useCart';
+import { useCart } from '../../../hooks/useCart';
 
 export function Header() {
   const { cart } = useCart();

@@ -1,6 +1,6 @@
-import { ProductList } from '../components/product/ProductList';
-import { ProductCardSkeleton } from '../components/product/ProductCardSkeleton';
-import { useProducts } from '../hooks/useProducts';
+import { ProductList } from '../../components/product/ProductList';
+import { ProductCardSkeleton } from '../../components/product/ProductCardSkeleton';
+import { useProducts } from '../../hooks/useProducts';
 
 export function Products() {
   const { products, loading } = useProducts();

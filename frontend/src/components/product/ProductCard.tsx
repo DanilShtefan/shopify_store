@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
 import './ProductCard.css';
 import { useCart } from '../../hooks/useCart';
-import { Button } from '../ui/Button';
+import { Button } from '../ui/Button/Button';
 
 interface ProductCardProps {
   product: Product;

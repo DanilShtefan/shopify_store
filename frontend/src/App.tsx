@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import { Products } from './pages/Products';
-import { ProductDetail } from './pages/ProductDetail';
-import { Cart } from './pages/Cart';
+import { Products } from './pages/Products/Products';
+import { ProductDetail } from './pages/ProductDetail/ProductDetail';
+import { Cart } from './pages/Cart/Cart';
 import './styles/index.css';
 import { Layout } from './components/loyout/Layout';
 import { ErrorBoundary } from 'react-error-boundary';
-import { ErrorFallback } from './components/ui/ErrorFallback';
+import { ErrorFallback } from './components/ui/ErrorFallback/ErrorFallback';
 
 function App() {
   return (

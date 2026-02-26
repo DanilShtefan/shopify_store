@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import './Cart.css';
-import { Skeleton } from '../components/ui/Skeleton';
-import { IconButton } from '../components/ui/IconButton';
-import { Button } from '../components/ui/Button';
-import { BackButton } from '../components/ui/BackButton';
-import { useCart } from '../hooks/useCart';
+import { Skeleton } from '../../components/ui/Skeleton/Skeleton';
+import { IconButton } from '../../components/ui/IconButton/IconButton';
+import { Button } from '../../components/ui/Button/Button';
+import { BackButton } from '../../components/ui/BackButton/BackButton';
+import { useCart } from '../../hooks/useCart';
 
 export function Cart() {
   const { cart, loading, error, updateItem, removeItem } = useCart();
