@@ -3,9 +3,9 @@ import { Products } from './pages/Products/Products';
 import { ProductDetail } from './pages/ProductDetail/ProductDetail';
 import { Cart } from './pages/Cart/Cart';
 import './styles/index.css';
-import { Layout } from './components/loyout/Layout';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './components/ui/ErrorFallback/ErrorFallback';
+import { Layout } from './components/loyout/Layout/Layout';
 
 function App() {
   return (
