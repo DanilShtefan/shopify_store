@@ -7,8 +7,12 @@ import { Button } from '../components/ui/Button';
 
 export function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const { cart, addToCart } = useCart();
   const { product, loading, error } = useProduct(slug ?? '');
-  const { addToCart } = useCart();
+
+  const cartItem = product ? cart?.items.find(item => item.product_id === product.id) : undefined;
+  const inCartQuantity = cartItem?.quantity || 0;
+  const canAddMore = product ? product.stock - inCartQuantity : 0;
 
   const handleAddToCart = async () => {
     if (product) {
@@ -54,9 +58,13 @@ export function ProductDetail() {
             variant="primary"
             size="large"
             onClick={handleAddToCart}
-            disabled={product.stock === 0}
+            disabled={canAddMore <= 0}
           >
-            {product.stock > 0 ? 'В корзину' : 'Нет в наличии'}
+            {canAddMore > 0
+              ? 'В корзину'
+              : inCartQuantity > 0
+                ? `В корзине (${inCartQuantity})`
+                : 'Нет в наличии'}
           </Button>
         </div>
       </div>
