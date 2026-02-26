@@ -1,0 +1,16 @@
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 24px 0;
+  margin: 0;
+  justify-items: center;  /* Центрирует карточки внутри ячеек */
+}
+
+.no-products {
+  text-align: center;
+  padding: 48px;
+  color: #666;
+  font-size: 18px;
+  width: 100%;
+}

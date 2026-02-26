@@ -1,0 +1,61 @@
+import { Link } from 'react-router-dom';
+import type { Product } from '../../types/product';
+import './ProductCard.css';
+import { useCart } from '../../hooks/useCart';
+import { Button } from '../ui/Button';
+
+interface ProductCardProps {
+  product: Product;
+}
+
+export function ProductCard({ product }: ProductCardProps) {
+  const { cart, addToCart } = useCart();
+
+  const cartItem = cart?.items.find(item => item.product_id === product.id);
+  const inCartQuantity = cartItem?.quantity || 0;
+  const canAddMore = product.stock - inCartQuantity;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await addToCart(product.id, 1);
+  };
+
+  return (
+    <div className="product-card">
+      <Link to={`/products/${product.slug}`} className="product-link">
+        <div className="product-image">
+          {product.image ? (
+            <img src={product.image} alt={product.name} />
+          ) : (
+            <div className="product-placeholder">Нет фото</div>
+          )}
+        </div>
+        <div className="product-info">
+          <h3 className="product-name">{product.name}</h3>
+          <p className="product-description">{product.description}</p>
+          <div className="product-footer">
+            <span className="product-price">${product.price}</span>
+            <span className="product-stock">
+              {product.stock > 0
+                ? `В наличии: ${product.stock}`
+                : 'Нет в наличии'}
+            </span>
+          </div>
+        </div>
+      </Link>
+      <Button
+        variant="primary"
+        size="medium"
+        fullWidth
+        onClick={handleAddToCart}
+        disabled={canAddMore <= 0}
+      >
+        {canAddMore > 0
+          ? 'В корзину'
+          : inCartQuantity > 0
+            ? `В корзине (${inCartQuantity})`
+            : 'Нет в наличии'}
+      </Button>
+    </div>
+  );
+}
