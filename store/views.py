@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 import json
 from .models import Product, Cart, CartItem, Wishlist, WishlistItem, ProductImage
 
@@ -23,6 +24,32 @@ def product_list(request):
         for p in products
     ]
     return JsonResponse({'products': data})
+
+@csrf_exempt
+def product_search(request):
+    """Поиск товаров по названию и описанию"""
+    query = request.GET.get('q', '').strip()
+    
+    if not query:
+        return JsonResponse({'products': [], 'query': ''})
+    
+    products = Product.objects.filter(
+        Q(name__icontains=query) | Q(description__icontains=query)
+    )[:10]  # Ограничим 10 результатами
+    
+    data = [
+        {
+            'id': p.id,
+            'name': p.name,
+            'description': p.description,
+            'price': str(p.price),
+            'stock': p.stock,
+            'image': p.get_main_image(),
+            'slug': p.slug,
+        }
+        for p in products
+    ]
+    return JsonResponse({'products': data, 'query': query})
 
 def product_detail(request, slug):
     try:

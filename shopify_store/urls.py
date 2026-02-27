@@ -3,6 +3,7 @@ from django.urls import path
 from store.views import (
     product_list,
     product_detail,
+    product_search,
     cart_detail,
     cart_add_item,
     cart_update_item,
@@ -18,6 +19,7 @@ urlpatterns = [
     # Товары
     path('api/products/', product_list, name='product_list'),
     path('api/products/<slug:slug>/', product_detail, name='product_detail'),
+    path('api/search/', product_search, name='product_search'),
 
     # Корзина
     path('api/cart/<str:session_id>/', cart_detail, name='cart_detail'),
