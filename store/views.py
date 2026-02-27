@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Product, Cart, CartItem, Wishlist, WishlistItem
+from .models import Product, Cart, CartItem, Wishlist, WishlistItem, ProductImage
 
 @csrf_exempt
 def product_list(request):
@@ -13,7 +13,11 @@ def product_list(request):
             'description': p.description,
             'price': str(p.price),
             'stock': p.stock,
-            'image': p.image,
+            'image': p.get_main_image(),
+            'images': [
+                {'id': img.id, 'url': img.image_url, 'is_main': img.is_main}
+                for img in p.images.all()
+            ],
             'slug': p.slug,
         }
         for p in products
@@ -29,7 +33,11 @@ def product_detail(request, slug):
             'description': product.description,
             'price': str(product.price),
             'stock': product.stock,
-            'image': product.image,
+            'image': product.get_main_image(),
+            'images': [
+                {'id': img.id, 'url': img.image_url, 'is_main': img.is_main}
+                for img in product.images.all()
+            ],
             'slug': product.slug,
         }
         return JsonResponse(data)
@@ -54,7 +62,7 @@ def cart_detail(request, session_id):
                     'product_id': item.product.id,
                     'product_name': item.product.name,
                     'product_slug': item.product.slug,
-                    'product_image': item.product.image,
+                    'product_image': item.product.get_main_image(),
                     'quantity': item.quantity,
                     'price': str(item.product.price),
                     'subtotal': str(item.get_subtotal()),
@@ -174,7 +182,7 @@ def wishlist_detail(request, session_id):
                     'product_id': item.product.id,
                     'product_name': item.product.name,
                     'product_slug': item.product.slug,
-                    'product_image': item.product.image,
+                    'product_image': item.product.get_main_image(),
                     'product_price': str(item.product.price),
                     'product_stock': item.product.stock,
                 }

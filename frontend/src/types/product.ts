@@ -1,3 +1,9 @@
+export interface ProductImage {
+  id: number;
+  url: string;
+  is_main: boolean;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -5,5 +11,6 @@ export interface Product {
   price: string;
   stock: number;
   image: string;
+  images: ProductImage[];
   slug: string | undefined;
 }

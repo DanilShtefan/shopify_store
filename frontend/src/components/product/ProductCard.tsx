@@ -5,6 +5,7 @@ import { useCart } from '../../hooks/useCart';
 import { useWishlist } from '../../hooks/useWishlist';
 import { Button } from '../ui/Button/Button';
 import { IconButton } from '../ui/IconButton/IconButton';
+import { useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +14,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { cart, addToCart } = useCart();
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const cartItem = cart?.items.find(item => item.product_id === product.id);
   const inCartQuantity = cartItem?.quantity || 0;
@@ -20,6 +22,20 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const wishlistItem = wishlist?.items.find(item => item.product_id === product.id);
   const isInWishlist = !!wishlistItem;
+
+  const images = product.images.length > 0 ? product.images : [{ id: 0, url: product.image, is_main: true }];
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,7 +45,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isInWishlist) {
       await removeFromWishlist(wishlistItem.id);
     } else {
@@ -41,10 +57,28 @@ export function ProductCard({ product }: ProductCardProps) {
     <div className="product-card">
       <Link to={`/products/${product.slug}`} className="product-link">
         <div className="product-image">
-          {product.image ? (
-            <img src={product.image} alt={product.name} />
+          {images[currentImageIndex]?.url ? (
+            <img src={images[currentImageIndex].url} alt={product.name} />
           ) : (
             <div className="product-placeholder">Нет фото</div>
+          )}
+          {images.length > 1 && (
+            <>
+              <IconButton className="image-nav-btn image-nav-prev" onClick={handlePrevImage}>
+                ‹
+              </IconButton>
+              <IconButton className="image-nav-btn image-nav-next" onClick={handleNextImage}>
+                ›
+              </IconButton>
+              <div className="image-indicators">
+                {images.map((_, index) => (
+                  <span
+                    key={index}
+                    className={`indicator ${index === currentImageIndex ? 'active' : ''}`}
+                  />
+                ))}
+              </div>
+            </>
           )}
           <IconButton
             className={`favorite-btn ${isInWishlist ? 'favorite-active' : ''}`}

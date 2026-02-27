@@ -9,21 +9,46 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
-    image = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(unique=True, blank=True)
 
     def __str__(self):
         return self.name
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
+    def get_main_image(self):
+        """Получить главное изображение (первое по порядку)"""
+        main_image = self.images.filter(is_main=True).first()
+        if main_image:
+            return main_image.image_url
+        first_image = self.images.first()
+        if first_image:
+            return first_image.image_url
+        return ""
+
     class Meta:
         verbose_name = "Товар"
         verbose_name_plural = "Товары"
+
+
+class ProductImage(models.Model):
+    """Изображение товара"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image_url = models.URLField()
+    is_main = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image for {self.product.name}"
+
+    class Meta:
+        ordering = ['is_main', 'created_at']
+        verbose_name = "Изображение товара"
+        verbose_name_plural = "Изображения товаров"
 
 class Cart(models.Model):
     """Корзина покупателя"""
