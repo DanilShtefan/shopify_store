@@ -13,6 +13,9 @@ export function Header() {
         </Link>
         <nav className="nav">
           <Link to="/" className="nav-link">Товары</Link>
+          <Link to="/wishlist" className="nav-link">
+            Избранное
+          </Link>
           <Link to="/cart" className="nav-link">
             Корзина
             {cart && cart.items_count > 0 && (

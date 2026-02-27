@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import App from './App';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -16,7 +17,9 @@ createRoot(document.getElementById('root')!).render(
       >
         <ToastProvider>
           <CartProvider>
-            <App />
+            <WishlistProvider>
+              <App />
+            </WishlistProvider>
           </CartProvider>
         </ToastProvider>
       </ErrorBoundary>
