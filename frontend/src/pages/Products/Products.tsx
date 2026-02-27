@@ -10,7 +10,7 @@ export function Products() {
       <div className="products-page">
         <h1>Все товары</h1>
         <div className="product-list">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: products.length }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
         </div>

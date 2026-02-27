@@ -22,7 +22,7 @@ export function Wishlist() {
       <div className="wishlist-page">
         <h1>Избранное</h1>
         <div className="wishlist-items">
-          {Array.from({ length: 3 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="wishlist-item-skeleton">
               <Skeleton variant="rectangular" width="100px" height="100px" />
               <div className="wishlist-item-info-skeleton">
