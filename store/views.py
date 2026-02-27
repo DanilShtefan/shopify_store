@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Product, Cart, CartItem
+from .models import Product, Cart, CartItem, Wishlist, WishlistItem
 
 @csrf_exempt
 def product_list(request):
@@ -145,7 +145,7 @@ def cart_remove_item(request, session_id, item_id):
     """Удалить товар из корзины"""
     if request.method != 'DELETE':
         return JsonResponse({'error': 'Method not allowed'}, status=400)
-    
+
     try:
         cart = Cart.objects.get(session_id=session_id)
         cart_item = CartItem.objects.get(id=item_id, cart=cart)
@@ -155,3 +155,74 @@ def cart_remove_item(request, session_id, item_id):
         return JsonResponse({'error': 'Item not found'}, status=404)
     except Cart.DoesNotExist:
         return JsonResponse({'error': 'Cart not found'}, status=404)
+
+
+# === ИЗБРАННОЕ ===
+
+@csrf_exempt
+def wishlist_detail(request, session_id):
+    """Получить избранное"""
+    try:
+        wishlist = Wishlist.objects.get(session_id=session_id)
+        items = wishlist.items.select_related('product').all()
+        data = {
+            'id': wishlist.id,
+            'session_id': wishlist.session_id,
+            'items': [
+                {
+                    'id': item.id,
+                    'product_id': item.product.id,
+                    'product_name': item.product.name,
+                    'product_slug': item.product.slug,
+                    'product_image': item.product.image,
+                    'product_price': str(item.product.price),
+                    'product_stock': item.product.stock,
+                }
+                for item in items
+            ],
+            'items_count': items.count(),
+        }
+        return JsonResponse(data)
+    except Wishlist.DoesNotExist:
+        return JsonResponse({'error': 'Wishlist not found'}, status=404)
+
+@csrf_exempt
+def wishlist_add_item(request, session_id):
+    """Добавить товар в избранное"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=400)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        product_id = data.get('product_id')
+
+        product = Product.objects.get(id=product_id)
+        wishlist, _ = Wishlist.objects.get_or_create(session_id=session_id)
+
+        # Проверяем, есть ли уже в избранном
+        wishlist_item = WishlistItem.objects.filter(wishlist=wishlist, product=product).first()
+        if wishlist_item:
+            return JsonResponse({'error': 'Товар уже в избранном'}, status=400)
+
+        WishlistItem.objects.create(wishlist=wishlist, product=product)
+        return wishlist_detail(request, session_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'Product not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+@csrf_exempt
+def wishlist_remove_item(request, session_id, item_id):
+    """Удалить товар из избранного"""
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Method not allowed'}, status=400)
+
+    try:
+        wishlist = Wishlist.objects.get(session_id=session_id)
+        wishlist_item = WishlistItem.objects.get(id=item_id, wishlist=wishlist)
+        wishlist_item.delete()
+        return wishlist_detail(request, session_id)
+    except WishlistItem.DoesNotExist:
+        return JsonResponse({'error': 'Item not found'}, status=404)
+    except Wishlist.DoesNotExist:
+        return JsonResponse({'error': 'Wishlist not found'}, status=404)

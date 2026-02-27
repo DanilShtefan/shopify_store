@@ -7,18 +7,26 @@ from store.views import (
     cart_add_item,
     cart_update_item,
     cart_remove_item,
+    wishlist_detail,
+    wishlist_add_item,
+    wishlist_remove_item,
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+
     # Товары
     path('api/products/', product_list, name='product_list'),
     path('api/products/<slug:slug>/', product_detail, name='product_detail'),
-    
+
     # Корзина
     path('api/cart/<str:session_id>/', cart_detail, name='cart_detail'),
     path('api/cart/<str:session_id>/add/', cart_add_item, name='cart_add_item'),
     path('api/cart/<str:session_id>/update/<int:item_id>/', cart_update_item, name='cart_update_item'),
     path('api/cart/<str:session_id>/remove/<int:item_id>/', cart_remove_item, name='cart_remove_item'),
+
+    # Избранное
+    path('api/wishlist/<str:session_id>/', wishlist_detail, name='wishlist_detail'),
+    path('api/wishlist/<str:session_id>/add/', wishlist_add_item, name='wishlist_add_item'),
+    path('api/wishlist/<str:session_id>/remove/<int:item_id>/', wishlist_remove_item, name='wishlist_remove_item'),
 ]

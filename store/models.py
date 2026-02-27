@@ -47,9 +47,34 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
-    
+
     def get_subtotal(self):
         return float(self.product.price) * self.quantity
+
+
+class Wishlist(models.Model):
+    """Избранное покупателя"""
+    session_id = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Wishlist #{self.id}"
+
+
+class WishlistItem(models.Model):
+    """Элемент избранного"""
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('wishlist', 'product')
+        verbose_name = "Избранный товар"
+        verbose_name_plural = "Избранные товары"
+
+    def __str__(self):
+        return self.product.name
