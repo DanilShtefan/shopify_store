@@ -1,41 +1,97 @@
 .product-detail {
   margin: 0 auto;
+  padding: 0 16px;
+}
+
+.product-detail-back {
+  position: sticky;
+  top: 80px;
+  z-index: 10;
+  margin-bottom: 24px;
 }
 
 .product-detail-content {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto 400px;
   gap: 48px;
   align-items: start;
 }
 
-.product-detail-image {
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  overflow: hidden;
-  min-height: 400px;
+.product-detail-gallery {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 16px;
 }
 
-.product-detail-image img {
+.product-thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: sticky;
+  top: 140px;
+  height: fit-content;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.thumbnail:hover {
+  border-color: #999;
+}
+
+.thumbnail.active {
+  border-color: #000;
+}
+
+.thumbnail img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.image-placeholder {
-  color: #999;
-  font-size: 16px;
-}
-
-.product-detail-info {
+.product-detail-images {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.product-image-item {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-margin-top: 200px;
+}
+
+.product-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-detail-info {
+  position: sticky;
+  top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
 }
 
 .product-title {
@@ -75,9 +131,28 @@
   color: #d32f2f;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .product-detail-content {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+
+  .product-detail-gallery {
+    flex-direction: column;
+  }
+
+  .product-thumbnails {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .thumbnail {
+    flex-shrink: 0;
+  }
+
+  .product-detail-info {
+    position: static;
+    padding: 16px;
   }
 }
