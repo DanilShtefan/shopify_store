@@ -76,42 +76,47 @@ export function Cart() {
                 )}
               </div>
 
-              <div className="cart-item-info">
-                <Link
-                  to={`/products/${item.product_slug}`}
-                  className="cart-item-name"
-                >
-                  {item.product_name}
-                </Link>
-                <p className="cart-item-price">${item.price}</p>
-              </div>
+              <div className="cart-item-content">
+                <div className="cart-item-info">
+                  <Link
+                    to={`/products/${item.product_slug}`}
+                    className="cart-item-name"
+                  >
+                    {item.product_name}
+                  </Link>
+                  <p className="cart-item-price">${item.price}</p>
+                </div>
 
-              <div className="cart-item-quantity">
-                <IconButton
-                  onClick={() => updateItem(item.id, item.quantity - 1)}
-                  disabled={item.quantity <= 1}
-                >
-                  −
-                </IconButton>
-                <span className="quantity-value">{item.quantity}</span>
-                <IconButton
-                  onClick={() => updateItem(item.id, item.quantity + 1)}
-                  disabled={item.quantity >= item.product_stock}
-                >
-                  +
-                </IconButton>
-              </div>
+                <div className="cart-item-actions">
+                  <div className="cart-item-quantity">
+                    <IconButton
+                      onClick={() => updateItem(item.id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                    >
+                      −
+                    </IconButton>
+                    <span className="quantity-value">{item.quantity}</span>
+                    <IconButton
+                      onClick={() => updateItem(item.id, item.quantity + 1)}
+                      disabled={item.quantity >= item.product_stock}
+                    >
+                      +
+                    </IconButton>
+                  </div>
 
-              <div className="cart-item-subtotal">
-                ${item.subtotal}
-              </div>
+                  <div className="cart-item-subtotal">
+                    ${item.subtotal}
+                  </div>
 
-              <IconButton
-                variant="danger"
-                onClick={() => removeItem(item.id)}
-              >
-                ✕
-              </IconButton>
+                  <IconButton
+                    variant="danger"
+                    onClick={() => removeItem(item.id)}
+                    className="remove-btn"
+                  >
+                    ✕
+                  </IconButton>
+                </div>
+              </div>
             </div>
           ))}
         </div>

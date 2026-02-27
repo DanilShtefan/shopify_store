@@ -33,11 +33,12 @@
   left: 0 !important;
   right: 0 !important;
   background-color: #fff !important;
-  padding: 0 16px !important;
+  padding: 16px 16px !important;
   border-bottom: 1px solid #e0e0e0 !important;
   z-index: 9999 !important;
   width: 100% !important;
-  height: 80px !important;
+  height: auto !important;
+  min-height: 104px !important;
   box-sizing: border-box !important;
   opacity: 0 !important;
   pointer-events: none !important;

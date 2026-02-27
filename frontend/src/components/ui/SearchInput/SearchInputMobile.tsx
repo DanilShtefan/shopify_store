@@ -38,7 +38,7 @@ export function SearchInputMobile() {
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [clearResults]);
+  }, [isExpanded, clearResults, handleClose]);
 
   useEffect(() => {
     if (isExpanded && inputRef.current) {
