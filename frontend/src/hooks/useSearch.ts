@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { searchService, type SearchResult } from '../services/searchService';
+
+const DEBOUNCE_DELAY = 300;
 
 interface UseSearchResult {
   results: SearchResult[];
@@ -15,12 +17,14 @@ export function useSearch(): UseSearchResult {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const search = useCallback(async (searchQuery: string) => {
+  const executeSearch = useCallback(async (searchQuery: string) => {
     setQuery(searchQuery);
 
     if (!searchQuery.trim()) {
       setResults([]);
+      setLoading(false);
       return;
     }
 
@@ -38,10 +42,31 @@ export function useSearch(): UseSearchResult {
     }
   }, []);
 
+  const search = useCallback((searchQuery: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      executeSearch(searchQuery);
+    }, DEBOUNCE_DELAY);
+  }, [executeSearch]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
   const clearResults = useCallback(() => {
     setResults([]);
     setQuery('');
     setError(null);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
   }, []);
 
   return { results, query, loading, error, search, clearResults };
