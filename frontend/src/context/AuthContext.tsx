@@ -15,6 +15,8 @@ interface JwtPayload {
   username: string;
   email: string;
   exp: number;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface AuthContextType {
@@ -29,6 +31,7 @@ interface AuthContextType {
   logout: () => void;
   refreshAccessToken: () => Promise<boolean>;
   clearError: () => void;
+  updateUser: (data: Partial<User>) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -80,9 +83,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser({
           id: payload.user_id,
           username: payload.username,
-          email: payload.email,
-          first_name: '',
-          last_name: '',
+          email: payload.email || '',
+          first_name: payload.first_name || '',
+          last_name: payload.last_name || '',
         });
       } catch (e) {
         // Токен невалиден — очищаем
@@ -98,6 +101,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+
+  /**
+   * Обновление данных пользователя
+   */
+  const updateUser = useCallback(async (data: Partial<User>): Promise<boolean> => {
+    if (!accessToken) return false;
+    
+    // Очищаем ошибку перед запросом
+    setError(null);
+    
+    try {
+      const updatedUser = await authService.updateProfile(accessToken, data);
+      setUser(updatedUser);
+      
+      // Обновляем токен с новыми данными
+      const newRefresh = refreshToken ? await authService.refreshToken(refreshToken) : null;
+      if (newRefresh) {
+        setAccessToken(newRefresh.access);
+        localStorage.setItem(ACCESS_TOKEN_KEY, newRefresh.access);
+      }
+      
+      return true;
+    } catch (error) {
+      let errorMessage: any = 'Ошибка обновления';
+      if (error instanceof Error) {
+        try {
+          const errorData = error.message;
+          if (typeof errorData === 'string') {
+            const parsed = JSON.parse(errorData);
+            errorMessage = parsed;
+          } else {
+            errorMessage = errorData;
+          }
+        } catch {
+          errorMessage = error.message;
+        }
+      }
+      setError(errorMessage);
+      console.error('Update profile failed:', error);
+      return false;
+    }
+  }, [accessToken, refreshToken]);
 
   /**
    * Логин пользователя
@@ -209,6 +254,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         refreshAccessToken,
         clearError,
+        updateUser,
       }}
     >
       {children}

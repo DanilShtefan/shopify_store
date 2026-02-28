@@ -376,3 +376,28 @@ def profile_view(request):
     """
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def profile_update_view(request):
+    """
+    Обновление профиля текущего пользователя.
+    Требует авторизации (JWT токен в заголовке).
+    """
+    user = request.user
+    data = request.data.copy()
+    
+    # Нельзя изменить username на существующий
+    if 'username' in data and data['username'] != user.username:
+        if User.objects.filter(username=data['username']).exists():
+            return Response(
+                {'username': 'Пользователь с таким именем уже существует'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    serializer = UserSerializer(user, data=data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

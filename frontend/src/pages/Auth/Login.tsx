@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { ToastContext } from '../../context/ToastContext';
 import './Auth.css';
 import { Button } from '../../components/ui/Button/Button';
+import { Input } from '../../components/ui/Input/Input';
 
 export function Login() {
   const [username, setUsername] = useState('');
@@ -19,11 +20,12 @@ export function Login() {
     authContext?.clearError();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (authContext?.error) authContext.clearError();
-    if (e.target.type === 'text') setUsername(e.target.value);
-    else setPassword(e.target.value);
-  };
+  // Очищаем ошибку при уходе со страницы
+  useEffect(() => {
+    return () => {
+      authContext?.clearError();
+    };
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -67,29 +69,29 @@ export function Login() {
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="auth-field">
-            <label className="auth-label">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={handleChange}
-              className="auth-input"
-              required
-              disabled={loading}
-            />
-          </div>
+          <Input
+            label="Username"
+            type="text"
+            placeholder="Введите имя пользователя"
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              if (authContext?.error) authContext.clearError();
+            }}
+            disabled={loading}
+          />
 
-          <div className="auth-field">
-            <label className="auth-label">Пароль</label>
-            <input
-              type="password"
-              value={password}
-              onChange={handleChange}
-              className="auth-input"
-              required
-              disabled={loading}
-            />
-          </div>
+          <Input
+            label="Пароль"
+            type="password"
+            placeholder="Введите пароль"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (authContext?.error) authContext.clearError();
+            }}
+            disabled={loading}
+          />
 
           <Button
             type="submit"
@@ -97,6 +99,7 @@ export function Login() {
             size="medium"
             fullWidth
             loading={loading}
+            disabled={!!authContext?.error || loading}
             className="auth-button-animate"
           >
             Войти

@@ -1,12 +1,12 @@
 import './LogoutButton.css';
 
 interface LogoutButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  size?: 'small' | 'medium';
+  size?: 'small' | 'medium' | 'large';
 }
 
 export function LogoutButton({
   children = 'Выход',
-  size = 'small',
+  size = 'medium',
   className = '',
   ...props
 }: LogoutButtonProps) {

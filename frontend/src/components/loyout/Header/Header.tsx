@@ -3,13 +3,12 @@ import './Header.css';
 import { useCart } from '../../../hooks/useCart';
 import { useWishlist } from '../../../hooks/useWishlist';
 import { useAuth } from '../../../hooks/useAuth';
-import { LogoutButton } from '../../ui/LogoutButton/LogoutButton';
 import { SearchInput } from '../../ui/SearchInput/SearchInput';
 
 export function Header() {
   const { cart } = useCart();
   const { wishlist } = useWishlist();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <header className="header">
@@ -27,31 +26,28 @@ export function Header() {
             <Link to="/wishlist" className="nav-link" title="Избранное">
               <span className="nav-icon">❤️</span>
               <span className="nav-text">Избранное</span>
-              {wishlist && wishlist.items_count > 0 && (
-                <span className="cart-badge">{wishlist.items_count}</span>
-              )}
+              <span className={`cart-badge ${wishlist && wishlist.items_count > 0 ? 'badge-visible' : 'badge-hidden'}`}>
+                {wishlist?.items_count || ''}
+              </span>
             </Link>
             <Link to="/cart" className="nav-link" title="Корзина">
               <span className="nav-icon">🛒</span>
               <span className="nav-text">Корзина</span>
-              {cart && cart.items_count > 0 && (
-                <span className="cart-badge">{cart.items_count}</span>
-              )}
+              <span className={`cart-badge ${cart && cart.items_count > 0 ? 'badge-visible' : 'badge-hidden'}`}>
+                {cart?.items_count || ''}
+              </span>
             </Link>
 
             {/* Авторизация */}
             {isAuthenticated ? (
-              <div className="auth-wrapper">
+              <Link to="/profile" className="user-info-link">
                 <div className="user-info">
                   <span className="user-avatar">
                     {user?.username?.charAt(0).toUpperCase() || 'U'}
                   </span>
                   <span className="user-name">{user?.username}</span>
                 </div>
-                <LogoutButton onClick={logout}>
-                  Выход
-                </LogoutButton>
-              </div>
+              </Link>
             ) : (
               <Link to="/login" className="nav-link" title="Вход">
                 <span className="nav-icon">👤</span>

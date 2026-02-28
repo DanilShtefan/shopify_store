@@ -3,7 +3,7 @@
   border: 1px solid #000;
   color: #000;
   font-size: 12px;
-  border-radius: 20px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-weight: 500;
@@ -39,18 +39,18 @@
   transform: scale(0.95);
 }
 
-.logout-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
 /* Sizes */
 .logout-btn-small {
   padding: 6px 14px;
+  font-size: 12px;
 }
 
 .logout-btn-medium {
-  padding: 8px 18px;
-  font-size: 13px;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.logout-btn-large {
+  padding: 14px 28px;
+  font-size: 16px;
 }

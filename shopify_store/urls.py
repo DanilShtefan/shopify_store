@@ -16,6 +16,7 @@ from store.views import (
     login_view,
     token_refresh_view,
     profile_view,
+    profile_update_view,
 )
 
 urlpatterns = [
@@ -42,4 +43,5 @@ urlpatterns = [
     path('api/auth/login/', login_view, name='login'),
     path('api/auth/token/refresh/', token_refresh_view, name='token_refresh'),
     path('api/auth/profile/', profile_view, name='profile'),
+    path('api/auth/profile/update/', profile_update_view, name='profile_update'),
 ]

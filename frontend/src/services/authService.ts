@@ -95,4 +95,20 @@ export const authService = {
       },
     });
   },
+
+  /**
+   * Обновление профиля пользователя
+   */
+  updateProfile: async (
+    accessToken: string,
+    data: Partial<AuthResponse['user']>
+  ): Promise<AuthResponse['user']> => {
+    return fetchApi<AuthResponse['user']>('/auth/profile/update/', {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(data),
+    });
+  },
 };
