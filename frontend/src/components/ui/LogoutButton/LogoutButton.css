@@ -1,0 +1,56 @@
+.logout-btn {
+  background: #fff;
+  border: 1px solid #000;
+  color: #000;
+  font-size: 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+
+.logout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+}
+
+.logout-btn:hover {
+  color: #fff;
+  border-color: #000;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.logout-btn:hover::before {
+  transform: translateX(0);
+}
+
+.logout-btn:active {
+  transform: scale(0.95);
+}
+
+.logout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Sizes */
+.logout-btn-small {
+  padding: 6px 14px;
+}
+
+.logout-btn-medium {
+  padding: 8px 18px;
+  font-size: 13px;
+}

@@ -3,6 +3,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 import json
 from .models import Product, Cart, CartItem, Wishlist, WishlistItem, ProductImage
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from .forms import RegisterSerializer, UserSerializer
 
 @csrf_exempt
 def product_list(request):
@@ -261,3 +269,110 @@ def wishlist_remove_item(request, session_id, item_id):
         return JsonResponse({'error': 'Item not found'}, status=404)
     except Wishlist.DoesNotExist:
         return JsonResponse({'error': 'Wishlist not found'}, status=404)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_view(request):
+    """
+    Регистрация пользователя + получение токенов.
+    Принимает: username, password, password2, email
+    Возвращает: access, refresh токены + данные пользователя
+    """
+    serializer = RegisterSerializer(data=request.data)
+    if serializer.is_valid():
+        # Создаём пользователя
+        user = serializer.save()
+        
+        # Генерируем токены
+        refresh = RefreshToken.for_user(user)
+        refresh['username'] = user.username
+        refresh['email'] = user.email
+        
+        return Response({
+            'tokens': {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            },
+            'user': UserSerializer(user).data
+        }, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    """
+    Логин пользователя.
+    Принимает: username, password
+    Возвращает: access, refresh токены
+    """
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response(
+            {'error': 'Введите username и пароль'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Проверяем логин/пароль
+    user = authenticate(username=username, password=password)
+    
+    if user is None:
+        return Response(
+            {'error': 'Неверный логин или пароль'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    # Генерируем токены
+    refresh = RefreshToken.for_user(user)
+    refresh['username'] = user.username
+    refresh['email'] = user.email
+    
+    return Response({
+        'tokens': {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        },
+        'user': UserSerializer(user).data
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def token_refresh_view(request):
+    """
+    Обновление access токена.
+    Принимает: refresh токен
+    Возвращает: новый access токен
+    """
+    refresh_token = request.data.get('refresh')
+    
+    if not refresh_token:
+        return Response(
+            {'error': 'Refresh токен обязателен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        refresh = RefreshToken(refresh_token)
+        return Response({
+            'access': str(refresh.access_token)
+        })
+    except Exception as e:
+        return Response(
+            {'error': 'Неверный refresh токен'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile_view(request):
+    """
+    Получение профиля текущего пользователя.
+    Требует авторизации (JWT токен в заголовке).
+    """
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)

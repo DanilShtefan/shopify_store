@@ -3,6 +3,8 @@ import { Products } from './pages/Products/Products';
 import { ProductDetail } from './pages/ProductDetail/ProductDetail';
 import { Cart } from './pages/Cart/Cart';
 import { Wishlist } from './pages/Wishlist/Wishlist';
+import { Login } from './pages/Auth/Login';
+import { Register } from './pages/Auth/Register';
 import './styles/index.css';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './components/ui/ErrorFallback/ErrorFallback';
@@ -16,6 +18,8 @@ function App() {
         <Route path="/products/:slug" element={<ErrorBoundary FallbackComponent={ErrorFallback}><ProductDetail /></ErrorBoundary>} />
         <Route path="/cart" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Cart /></ErrorBoundary>} />
         <Route path="/wishlist" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Wishlist /></ErrorBoundary>} />
+        <Route path="/login" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Login /></ErrorBoundary>} />
+        <Route path="/register" element={<ErrorBoundary FallbackComponent={ErrorFallback}><Register /></ErrorBoundary>} />
       </Routes>
     </Layout>
   );

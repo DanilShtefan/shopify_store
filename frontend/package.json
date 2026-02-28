@@ -11,6 +11,8 @@
     "start-all": "concurrently \"npm run dev\" \"cd .. && python manage.py runserver\""
   },
   "dependencies": {
+    "axios": "^1.13.6",
+    "jwt-decode": "^4.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-error-boundary": "^6.1.1",

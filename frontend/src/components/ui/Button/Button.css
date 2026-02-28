@@ -52,6 +52,17 @@
   background-color: #d32f2f;
 }
 
+.btn-ghost {
+  background-color: transparent;
+  color: #000;
+  border: 1px solid #000;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: #000;
+  color: #fff;
+}
+
 /* Sizes */
 .btn-small {
   padding: 6px 12px;

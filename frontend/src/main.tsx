@@ -1,20 +1,17 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { CartProvider } from './context/CartContext';
-import { WishlistProvider } from './context/WishlistContext';
-import App from './App';
-import { ToastProvider } from './context/ToastContext';
-import { ErrorBoundary } from 'react-error-boundary';
-import { ErrorFallback } from './components/ui/ErrorFallback/ErrorFallback';
+import App from './App.tsx';
+import { CartProvider } from './context/CartContext.tsx';
+import { WishlistProvider } from './context/WishlistContext.tsx';
+import { ToastProvider } from './context/ToastContext.tsx';
+import { AuthProvider } from './context/AuthContext.tsx';
+import './styles/index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onReset={() => window.location.reload()}
-      >
+      <AuthProvider>
         <ToastProvider>
           <CartProvider>
             <WishlistProvider>
@@ -22,7 +19,7 @@ createRoot(document.getElementById('root')!).render(
             </WishlistProvider>
           </CartProvider>
         </ToastProvider>
-      </ErrorBoundary>
+      </AuthProvider>
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 );
