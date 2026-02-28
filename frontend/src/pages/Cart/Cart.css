@@ -52,7 +52,6 @@
 .cart-empty {
   text-align: center;
   padding: 60px 20px;
-  background: #fafafa;
   border-radius: 12px;
   animation: fadeIn 0.4s ease-out;
 }
