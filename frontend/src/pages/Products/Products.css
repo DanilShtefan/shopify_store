@@ -118,9 +118,45 @@
   font-size: 14px;
 }
 
+/* Плавное появление контента */
+.no-products {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  background: #fafafa;
+  border-radius: 12px;
+  margin-top: 40px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.no-products p:first-child {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.no-products p:last-child {
+  font-size: 16px;
+  margin: 0;
+}
+
+.product-list {
+  animation: fadeIn 0.4s ease-out;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
