@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { productService, type ProductListParams, type ProductDetailResponse } from '../services/productService';
 import type { Product } from '../types/product';
 
@@ -95,9 +95,15 @@ export function useProduct(slug: string) {
   const [product, setProduct] = useState<ProductDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const prevSlugRef = useRef<string | null>(null);
 
   useEffect(() => {
     async function fetchProduct() {
+      // Если это первый запрос для этого slug - показываем loading
+      if (prevSlugRef.current !== slug) {
+        setLoading(true);
+      }
+      
       try {
         const data = await productService.getProductBySlug(slug);
         setProduct(data);
@@ -106,6 +112,7 @@ export function useProduct(slug: string) {
         setError(err instanceof Error ? err.message : 'Failed to fetch product');
       } finally {
         setLoading(false);
+        prevSlugRef.current = slug;
       }
     }
 

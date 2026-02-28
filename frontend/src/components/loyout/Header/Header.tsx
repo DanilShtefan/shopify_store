@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Heart, ShoppingCart, User } from 'lucide-react';
 import './Header.css';
@@ -6,7 +7,7 @@ import { useWishlist } from '../../../hooks/useWishlist';
 import { useAuth } from '../../../hooks/useAuth';
 import { SearchInput } from '../../ui/SearchInput/SearchInput';
 
-export function Header() {
+export const Header = memo(function Header() {
   const { cart } = useCart();
   const { wishlist } = useWishlist();
   const { user, isAuthenticated } = useAuth();
@@ -61,4 +62,4 @@ export function Header() {
       </div>
     </header>
   );
-}
+});

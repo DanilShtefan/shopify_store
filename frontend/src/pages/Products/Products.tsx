@@ -1,11 +1,60 @@
+import { memo } from 'react';
 import { ProductList } from '../../components/product/ProductList';
-import { ProductCardSkeleton } from '../../components/product/ProductCardSkeleton';
 import { CategoryList } from '../../components/category/CategoryList';
 import { useProducts } from '../../hooks/useProducts';
 import { useCategory } from '../../hooks/useCategory';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { LoadMore } from '../../components/ui/LoadMore/LoadMore';
 import './Products.css';
+
+// Компонент списка товаров - мемоизированный
+const ProductListContent = memo(function ProductListContent({ 
+  products, 
+  loading, 
+  loadingMore, 
+  hasMore, 
+  sentinelRef 
+}: { 
+  products: any[]; 
+  loading: boolean; 
+  loadingMore: boolean; 
+  hasMore: boolean;
+  sentinelRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  // Показываем индикатор загрузки только при первой загрузке
+  if (loading && products.length === 0) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Загрузка товаров...</p>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="no-products">
+        <p>📭</p>
+        <p>В этой категории пока нет товаров</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <ProductList products={products} />
+      {loadingMore && (
+        <div className="loading-more-container">
+          <div className="loading-spinner"></div>
+          <p>Загрузка...</p>
+        </div>
+      )}
+      <div ref={sentinelRef}>
+        <LoadMore loading={loadingMore} hasMore={hasMore} />
+      </div>
+    </>
+  );
+});
 
 export function Products() {
   const { selectedCategory, categories, selectCategory } = useCategory();
@@ -53,32 +102,13 @@ export function Products() {
             )}
           </div>
 
-          {loading && products.length === 0 ? (
-            <div className="product-list">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="no-products">
-              <p>📭</p>
-              <p>В этой категории пока нет товаров</p>
-            </div>
-          ) : (
-            <>
-              <ProductList products={products} />
-              {loadingMore && (
-                <div className="product-list-loading">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <ProductCardSkeleton key={i} />
-                  ))}
-                </div>
-              )}
-              <div ref={sentinelRef}>
-                <LoadMore loading={loadingMore} hasMore={hasMore} />
-              </div>
-            </>
-          )}
+          <ProductListContent 
+            products={products} 
+            loading={loading} 
+            loadingMore={loadingMore} 
+            hasMore={hasMore}
+            sentinelRef={sentinelRef}
+          />
         </div>
       </div>
     </div>

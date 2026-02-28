@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import './Cart.css';
-import { Skeleton } from '../../components/ui/Skeleton/Skeleton';
 import { IconButton } from '../../components/ui/IconButton/IconButton';
 import { Button } from '../../components/ui/Button/Button';
 import { BackButton } from '../../components/ui/BackButton/BackButton';
@@ -9,32 +8,14 @@ import { useCart } from '../../hooks/useCart';
 export function Cart() {
   const { cart, loading, error, updateItem, removeItem } = useCart();
 
-  // Показываем скелетоны во время загрузки
+  // Показываем индикатор загрузки
   if (loading) {
     return (
       <div className="cart-page">
         <h1>Корзина</h1>
-        <div className="cart-content">
-          <div className="cart-items">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="cart-item-skeleton">
-                <Skeleton variant="rectangular" width="100px" height="100px" />
-                <div className="cart-item-info-skeleton">
-                  <Skeleton height="20px" width="200px" />
-                  <Skeleton height="16px" width="80px" />
-                </div>
-                <Skeleton height="32px" width="100px" />
-                <Skeleton height="24px" width="80px" />
-                <Skeleton height="32px" width="32px" />
-              </div>
-            ))}
-          </div>
-          <div className="cart-summary-skeleton">
-            <Skeleton height="32px" width="150px" />
-            <Skeleton height="20px" width="100%" />
-            <Skeleton height="20px" width="100%" />
-            <Skeleton height="48px" width="100%" />
-          </div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Загрузка...</p>
         </div>
       </div>
     );

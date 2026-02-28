@@ -1,3 +1,4 @@
+import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
 import './ProductCard.css';
@@ -5,24 +6,75 @@ import { useCart } from '../../hooks/useCart';
 import { useWishlist } from '../../hooks/useWishlist';
 import { Button } from '../ui/Button/Button';
 import { IconButton } from '../ui/IconButton/IconButton';
-import { useState } from 'react';
 import { Heart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const { cart, addToCart } = useCart();
-  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const cartItem = cart?.items.find(item => item.product_id === product.id);
+// Мемоизированная кнопка "В корзину"
+const AddToCartButton = memo(function AddToCartButton({ product, cart }: { product: Product; cart: any }) {
+  const { addToCart } = useCart();
+  
+  const cartItem = cart?.items.find((item: any) => item.product_id === product.id);
   const inCartQuantity = cartItem?.quantity || 0;
   const canAddMore = product.stock - inCartQuantity;
 
-  const wishlistItem = wishlist?.items.find(item => item.product_id === product.id);
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await addToCart(product.id, 1);
+  };
+
+  return (
+    <Button
+      variant="primary"
+      size="medium"
+      fullWidth
+      onClick={handleAddToCart}
+      disabled={canAddMore <= 0}
+    >
+      {canAddMore > 0
+        ? 'В корзину'
+        : inCartQuantity > 0
+          ? `В корзине (${inCartQuantity})`
+          : 'Нет в наличии'}
+    </Button>
+  );
+});
+
+// Мемоизированная кнопка избранного
+const WishlistButton = memo(function WishlistButton({ product, wishlist }: { product: Product; wishlist: any }) {
+  const { addToWishlist, removeFromWishlist } = useWishlist();
+  
+  const wishlistItem = wishlist?.items.find((item: any) => item.product_id === product.id);
   const isInWishlist = !!wishlistItem;
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isInWishlist) {
+      await removeFromWishlist(wishlistItem.id);
+    } else {
+      await addToWishlist(product.id);
+    }
+  };
+
+  return (
+    <IconButton
+      className={`favorite-btn ${isInWishlist ? 'favorite-active' : ''}`}
+      onClick={handleToggleFavorite}
+      aria-label={isInWishlist ? 'Удалить из избранного' : 'Добавить в избранное'}
+    >
+      <Heart size={20} strokeWidth={2} fill={isInWishlist ? '#ef4444' : 'none'} />
+    </IconButton>
+  );
+});
+
+export const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
+  const { cart } = useCart();
+  const { wishlist } = useWishlist();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const images = product.images.length > 0 ? product.images : [{ id: 0, url: product.image, is_main: true }];
 
@@ -36,22 +88,6 @@ export function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    await addToCart(product.id, 1);
-  };
-
-  const handleToggleFavorite = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (isInWishlist) {
-      await removeFromWishlist(wishlistItem.id);
-    } else {
-      await addToWishlist(product.id);
-    }
   };
 
   return (
@@ -81,13 +117,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </div>
             </>
           )}
-          <IconButton
-            className={`favorite-btn ${isInWishlist ? 'favorite-active' : ''}`}
-            onClick={handleToggleFavorite}
-            aria-label={isInWishlist ? 'Удалить из избранного' : 'Добавить в избранное'}
-          >
-            <Heart size={20} strokeWidth={2} fill={isInWishlist ? '#ef4444' : 'none'} />
-          </IconButton>
+          <WishlistButton product={product} wishlist={wishlist} />
         </div>
         <div className="product-info">
           {product.category && (
@@ -105,19 +135,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </Link>
-      <Button
-        variant="primary"
-        size="medium"
-        fullWidth
-        onClick={handleAddToCart}
-        disabled={canAddMore <= 0}
-      >
-        {canAddMore > 0
-          ? 'В корзину'
-          : inCartQuantity > 0
-            ? `В корзине (${inCartQuantity})`
-            : 'Нет в наличии'}
-      </Button>
+      <AddToCartButton product={product} cart={cart} />
     </div>
   );
-}
+});

@@ -1,25 +1,42 @@
+import { memo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProduct } from '../../hooks/useProducts';
 import './ProductDetail.css';
 import { useCart } from '../../hooks/useCart';
 import { BackButton } from '../../components/ui/BackButton/BackButton';
 import { Button } from '../../components/ui/Button/Button';
-import { ProductDetailSkeleton } from './ProductDetailSkeleton';
 
-export function ProductDetail() {
-  const { slug } = useParams<{ slug: string }>();
+// Мемоизированный компонент кнопки
+const AddToCartButton = memo(function AddToCartButton({ product }: { product: any }) {
   const { cart, addToCart } = useCart();
-  const { product, loading, error } = useProduct(slug ?? '');
 
-  const cartItem = product ? cart?.items.find(item => item.product_id === product.id) : undefined;
+  const cartItem = cart?.items.find(item => item.product_id === product.id);
   const inCartQuantity = cartItem?.quantity || 0;
-  const canAddMore = product ? product.stock - inCartQuantity : 0;
+  const canAddMore = product.stock - inCartQuantity;
 
   const handleAddToCart = async () => {
-    if (product) {
-      await addToCart(product.id, 1);
-    }
+    await addToCart(product.id, 1);
   };
+
+  return (
+    <Button
+      variant="primary"
+      size="large"
+      onClick={handleAddToCart}
+      disabled={canAddMore <= 0}
+    >
+      {canAddMore > 0
+        ? 'В корзину'
+        : inCartQuantity > 0
+          ? `В корзине (${inCartQuantity})`
+          : 'Нет в наличии'}
+    </Button>
+  );
+});
+
+export const ProductDetail = memo(function ProductDetail() {
+  const { slug } = useParams<{ slug: string }>();
+  const { product, loading, error } = useProduct(slug ?? '');
 
   const images = product && product.images && product.images.length > 0
     ? product.images
@@ -32,8 +49,16 @@ export function ProductDetail() {
     }
   };
 
-  if (loading) {
-    return <ProductDetailSkeleton />;
+  // Показываем загрузку только если товара ещё не было
+  if (loading && !product) {
+    return (
+      <div className="product-detail">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Загрузка товара...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error || !product) {
@@ -85,20 +110,9 @@ export function ProductDetail() {
           </p>
           <p className="product-description">{product.description}</p>
 
-          <Button
-            variant="primary"
-            size="large"
-            onClick={handleAddToCart}
-            disabled={canAddMore <= 0}
-          >
-            {canAddMore > 0
-              ? 'В корзину'
-              : inCartQuantity > 0
-                ? `В корзине (${inCartQuantity})`
-                : 'Нет в наличии'}
-          </Button>
+          <AddToCartButton product={product} />
         </div>
       </div>
     </div>
   );
-}
+});

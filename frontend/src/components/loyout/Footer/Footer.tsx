@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import './Footer.css';
 
-export function Footer() {
+export const Footer = memo(function Footer() {
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -8,4 +9,4 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+});

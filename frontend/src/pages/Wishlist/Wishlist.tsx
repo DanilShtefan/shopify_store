@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import './Wishlist.css';
-import { Skeleton } from '../../components/ui/Skeleton/Skeleton';
 import { IconButton } from '../../components/ui/IconButton/IconButton';
 import { BackButton } from '../../components/ui/BackButton/BackButton';
 import { useWishlist } from '../../hooks/useWishlist';
@@ -8,22 +7,14 @@ import { useWishlist } from '../../hooks/useWishlist';
 export function Wishlist() {
   const { wishlist, loading, error, removeFromWishlist } = useWishlist();
 
-  // Показываем скелетоны во время загрузки
+  // Показываем индикатор загрузки
   if (loading) {
     return (
       <div className="wishlist-page">
         <h1>Избранное</h1>
-        <div className="wishlist-items">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="wishlist-item-skeleton">
-              <Skeleton variant="rectangular" width="100px" height="100px" />
-              <div className="wishlist-item-info-skeleton">
-                <Skeleton height="20px" width="200px" />
-                <Skeleton height="16px" width="80px" />
-              </div>
-              <Skeleton height="32px" width="32px" />
-            </div>
-          ))}
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Загрузка...</p>
         </div>
       </div>
     );
