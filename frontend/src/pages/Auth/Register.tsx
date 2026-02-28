@@ -25,6 +25,7 @@ export function Register() {
   // Очищаем ошибку при монтировании
   useEffect(() => {
     authContext?.clearError();
+    setFieldErrors({});
   }, []);
 
   // Очищаем ошибку при уходе со страницы
@@ -37,10 +38,12 @@ export function Register() {
 
   // Парсим ошибки при сохранении
   useEffect(() => {
+    setFieldErrors({});  // Сначала очищаем
+    
     if (authContext?.error) {
       const errors: {[key: string]: string} = {};
       const err = authContext.error;
-      
+
       // Если строка - пытаемся распарсить
       if (typeof err === 'string') {
         try {
@@ -60,7 +63,7 @@ export function Register() {
           errors[key] = Array.isArray(value) ? value[0] : String(value);
         });
       }
-      
+
       setFieldErrors(errors);
     }
   }, [authContext?.error]);
