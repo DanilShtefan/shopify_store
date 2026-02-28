@@ -1,6 +1,5 @@
 import { createContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { authService, type LoginData, type RegisterData } from '../services/authService';
-import { jwtDecode } from 'jwt-decode';
 
 interface User {
   id: number;
@@ -10,90 +9,24 @@ interface User {
   last_name: string;
 }
 
-interface JwtPayload {
-  user_id: number;
-  username: string;
-  email: string;
-  exp: number;
-  first_name?: string;
-  last_name?: string;
-}
-
 interface AuthContextType {
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: any;
   login: (data: LoginData) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
-  logout: () => void;
-  refreshAccessToken: () => Promise<boolean>;
+  logout: () => Promise<void>;
   clearError: () => void;
   updateUser: (data: Partial<User>) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ACCESS_TOKEN_KEY = 'access_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  /**
-   * Сохранение токенов в localStorage
-   */
-  const saveTokens = useCallback((access: string, refresh: string) => {
-    setAccessToken(access);
-    setRefreshToken(refresh);
-    localStorage.setItem(ACCESS_TOKEN_KEY, access);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
-  }, []);
-
-  /**
-   * Очистка токенов
-   */
-  const clearTokens = useCallback(() => {
-    setAccessToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-  }, []);
-
-  /**
-   * Загрузка токенов из localStorage при старте
-   */
-  useEffect(() => {
-    const storedAccess = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const storedRefresh = localStorage.getItem(REFRESH_TOKEN_KEY);
-
-    if (storedAccess && storedRefresh) {
-      setAccessToken(storedAccess);
-      setRefreshToken(storedRefresh);
-
-      // Декодируем токен и получаем данные пользователя
-      try {
-        const payload = jwtDecode<JwtPayload>(storedAccess);
-        setUser({
-          id: payload.user_id,
-          username: payload.username,
-          email: payload.email || '',
-          first_name: payload.first_name || '',
-          last_name: payload.last_name || '',
-        });
-      } catch (e) {
-        // Токен невалиден — очищаем
-        clearTokens();
-      }
-    }
-    setLoading(false);
-  }, [clearTokens]);
 
   /**
    * Очистка ошибки
@@ -103,25 +36,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
+   * Загрузка данных пользователя при старте
+   */
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userData = await authService.getProfile();
+        setUser(userData);
+      } catch (e) {
+        // Не авторизован — очищаем данные
+        setUser(null);
+      }
+      setLoading(false);
+    };
+
+    loadUser();
+  }, []);
+
+  /**
    * Обновление данных пользователя
    */
   const updateUser = useCallback(async (data: Partial<User>): Promise<boolean> => {
-    if (!accessToken) return false;
-    
     // Очищаем ошибку перед запросом
     setError(null);
-    
+
     try {
-      const updatedUser = await authService.updateProfile(accessToken, data);
+      const updatedUser = await authService.updateProfile(data);
       setUser(updatedUser);
-      
-      // Обновляем токен с новыми данными
-      const newRefresh = refreshToken ? await authService.refreshToken(refreshToken) : null;
-      if (newRefresh) {
-        setAccessToken(newRefresh.access);
-        localStorage.setItem(ACCESS_TOKEN_KEY, newRefresh.access);
-      }
-      
       return true;
     } catch (error) {
       let errorMessage: any = 'Ошибка обновления';
@@ -142,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Update profile failed:', error);
       return false;
     }
-  }, [accessToken, refreshToken]);
+  }, []);
 
   /**
    * Логин пользователя
@@ -150,7 +91,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (data: LoginData): Promise<boolean> => {
     try {
       const response = await authService.login(data);
-      saveTokens(response.tokens.access, response.tokens.refresh);
       setUser(response.user);
       setError(null);
       return true;
@@ -181,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Login failed:', error);
       return false;
     }
-  }, [saveTokens]);
+  }, []);
 
   /**
    * Регистрация пользователя
@@ -189,7 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (data: RegisterData): Promise<boolean> => {
     try {
       const response = await authService.register(data);
-      saveTokens(response.tokens.access, response.tokens.refresh);
       setUser(response.user);
       setError(null);
       return true;
@@ -212,47 +151,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Registration failed:', error);
       return false;
     }
-  }, [saveTokens]);
+  }, []);
 
   /**
    * Выход
    */
-  const logout = useCallback(() => {
-    clearTokens();
-    setUser(null);
-  }, [clearTokens]);
-
-  /**
-   * Обновление access токена
-   */
-  const refreshAccessToken = useCallback(async (): Promise<boolean> => {
-    if (!refreshToken) return false;
-
+  const logout = useCallback(async () => {
     try {
-      const response = await authService.refreshToken(refreshToken);
-      setAccessToken(response.access);
-      localStorage.setItem(ACCESS_TOKEN_KEY, response.access);
-      return true;
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-      logout();
-      return false;
+      await authService.logout();
+    } catch (e) {
+      console.error('Logout failed:', e);
     }
-  }, [refreshToken, logout]);
+    setUser(null);
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        accessToken,
-        refreshToken,
-        isAuthenticated: !!accessToken,
+        isAuthenticated: !!user,
         loading,
         error,
         login,
         register,
         logout,
-        refreshAccessToken,
         clearError,
         updateUser,
       }}

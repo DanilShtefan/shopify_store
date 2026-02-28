@@ -125,12 +125,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 from datetime import timedelta
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
 }
 
 SIMPLE_JWT = {
@@ -140,3 +146,23 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# Настройки безопасности - защита от брутфорса
+ACCOUNT_LOCKOUT = {
+    'MAX_ATTEMPTS': 5,           # Максимум попыток до блокировки
+    'LOCKOUT_TIME': 900,         # Время блокировки в секундах (15 минут)
+    'COOLDOWN_TIME': 300,        # Время между попытками (5 минут)
+}
+
+# CSRF настройки для работы с frontend
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+]
+
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # True для HTTPS в production
+SESSION_COOKIE_HTTPONLY = True
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # True для HTTPS в production
+CSRF_COOKIE_HTTPONLY = False  # Должен быть False для доступа из JS

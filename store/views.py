@@ -1,18 +1,21 @@
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.db.models import Q
+from django.utils import timezone
+from datetime import timedelta
 import json
-from .models import Product, Cart, CartItem, Wishlist, WishlistItem, ProductImage
+from .models import Product, Cart, CartItem, Wishlist, WishlistItem, ProductImage, FailedLoginAttempt
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import RefreshToken
 from .forms import RegisterSerializer, UserSerializer
+from django.conf import settings
 
-@csrf_exempt
+@ensure_csrf_cookie
 def product_list(request):
     products = Product.objects.all()
     data = [
@@ -33,18 +36,18 @@ def product_list(request):
     ]
     return JsonResponse({'products': data})
 
-@csrf_exempt
+@ensure_csrf_cookie
 def product_search(request):
     """Поиск товаров по названию и описанию"""
     query = request.GET.get('q', '').strip()
-    
+
     if not query:
         return JsonResponse({'products': [], 'query': ''})
-    
+
     products = Product.objects.filter(
         Q(name__icontains=query) | Q(description__icontains=query)
     )[:10]  # Ограничим 10 результатами
-    
+
     data = [
         {
             'id': p.id,
@@ -59,6 +62,7 @@ def product_search(request):
     ]
     return JsonResponse({'products': data, 'query': query})
 
+@ensure_csrf_cookie
 def product_detail(request, slug):
     try:
         product = Product.objects.get(slug=slug)
@@ -82,7 +86,7 @@ def product_detail(request, slug):
 
 # === КОРЗИНА ===
 
-@csrf_exempt
+@ensure_csrf_cookie
 def cart_detail(request, session_id):
     """Получить корзину"""
     try:
@@ -112,7 +116,7 @@ def cart_detail(request, session_id):
     except Cart.DoesNotExist:
         return JsonResponse({'error': 'Cart not found'}, status=404)
 
-@csrf_exempt
+@ensure_csrf_cookie
 def cart_add_item(request, session_id):
     """Добавить товар в корзину"""
     if request.method != 'POST':
@@ -152,38 +156,38 @@ def cart_add_item(request, session_id):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-@csrf_exempt
+@ensure_csrf_cookie
 def cart_update_item(request, session_id, item_id):
     """Обновить количество товара"""
     if request.method != 'PUT':
         return JsonResponse({'error': 'Method not allowed'}, status=400)
-    
+
     try:
         data = json.loads(request.body.decode('utf-8'))
         quantity = data.get('quantity', 1)
-        
+
         cart = Cart.objects.get(session_id=session_id)
         cart_item = CartItem.objects.get(id=item_id, cart=cart)
-        
+
         # ← ПРОВЕРКА: нельзя установить больше чем на складе
         if quantity > cart_item.product.stock:
             return JsonResponse({
                 'error': f'Недостаточно товара на складе. Доступно: {cart_item.product.stock}'
             }, status=400)
-        
+
         if quantity <= 0:
             cart_item.delete()
         else:
             cart_item.quantity = quantity
             cart_item.save()
-        
+
         return cart_detail(request, session_id)
     except CartItem.DoesNotExist:
         return JsonResponse({'error': 'Item not found'}, status=404)
     except Cart.DoesNotExist:
         return JsonResponse({'error': 'Cart not found'}, status=404)
 
-@csrf_exempt
+@ensure_csrf_cookie
 def cart_remove_item(request, session_id, item_id):
     """Удалить товар из корзины"""
     if request.method != 'DELETE':
@@ -202,7 +206,7 @@ def cart_remove_item(request, session_id, item_id):
 
 # === ИЗБРАННОЕ ===
 
-@csrf_exempt
+@ensure_csrf_cookie
 def wishlist_detail(request, session_id):
     """Получить избранное"""
     try:
@@ -229,7 +233,7 @@ def wishlist_detail(request, session_id):
     except Wishlist.DoesNotExist:
         return JsonResponse({'error': 'Wishlist not found'}, status=404)
 
-@csrf_exempt
+@ensure_csrf_cookie
 def wishlist_add_item(request, session_id):
     """Добавить товар в избранное"""
     if request.method != 'POST':
@@ -254,7 +258,7 @@ def wishlist_add_item(request, session_id):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-@csrf_exempt
+@ensure_csrf_cookie
 def wishlist_remove_item(request, session_id, item_id):
     """Удалить товар из избранного"""
     if request.method != 'DELETE':
@@ -272,6 +276,7 @@ def wishlist_remove_item(request, session_id, item_id):
     
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@ensure_csrf_cookie
 def register_view(request):
     """
     Регистрация пользователя + получение токенов.
@@ -283,11 +288,14 @@ def register_view(request):
         # Создаём пользователя
         user = serializer.save()
         
+        # Автоматический логин после регистрации
+        login(request, user)
+
         # Генерируем токены
         refresh = RefreshToken.for_user(user)
         refresh['username'] = user.username
         refresh['email'] = user.email
-        
+
         return Response({
             'tokens': {
                 'refresh': str(refresh),
@@ -295,41 +303,152 @@ def register_view(request):
             },
             'user': UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
-    
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def get_client_ip(request):
+    """Получение IP адреса клиента"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
+
+
+def check_lockout(username, ip_address):
+    """
+    Проверка блокировки.
+    Возвращает (is_locked, remaining_seconds)
+    """
+    try:
+        attempt = FailedLoginAttempt.objects.get(username=username)
+        if attempt.is_locked():
+            return True, attempt.get_lockout_remaining()
+    except FailedLoginAttempt.DoesNotExist:
+        pass
+    
+    return False, 0
+
+
+def record_failed_attempt(username, ip_address):
+    """
+    Запись неудачной попытки входа.
+    Блокирует после MAX_ATTEMPTS попыток.
+    """
+    max_attempts = settings.ACCOUNT_LOCKOUT['MAX_ATTEMPTS']
+    lockout_time = settings.ACCOUNT_LOCKOUT['LOCKOUT_TIME']
+    
+    attempt, created = FailedLoginAttempt.objects.get_or_create(
+        username=username,
+        ip_address=ip_address,
+    )
+    
+    if not created:
+        # Проверяем, не истёк ли период блокировки
+        if attempt.is_locked():
+            return
+        
+        # Сбрасываем счётчик если прошло достаточно времени
+        time_since_last = timezone.now() - attempt.last_attempt
+        if time_since_last > timedelta(seconds=lockout_time):
+            attempt.failed_attempts = 1
+            attempt.locked_until = None
+        else:
+            attempt.failed_attempts += 1
+    
+    # Блокируем если превышен лимит
+    if attempt.failed_attempts >= max_attempts:
+        attempt.locked_until = timezone.now() + timedelta(seconds=lockout_time)
+    
+    attempt.last_attempt = timezone.now()
+    attempt.save()
+
+
+def reset_failed_attempts(username):
+    """Сброс неудачных попыток после успешного входа"""
+    try:
+        attempt = FailedLoginAttempt.objects.get(username=username)
+        attempt.delete()
+    except FailedLoginAttempt.DoesNotExist:
+        pass
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@ensure_csrf_cookie
 def login_view(request):
     """
     Логин пользователя.
     Принимает: username, password
     Возвращает: access, refresh токены
+    
+    Защита от брутфорса:
+    - Блокировка после 5 неудачных попыток
+    - Время блокировки: 15 минут
     """
     username = request.data.get('username')
     password = request.data.get('password')
-    
+    ip_address = get_client_ip(request)
+
     if not username or not password:
         return Response(
             {'error': 'Введите username и пароль'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
+    # Проверяем блокировку
+    is_locked, remaining = check_lockout(username, ip_address)
+    if is_locked:
+        minutes = remaining // 60
+        seconds = remaining % 60
+        return Response(
+            {
+                'error': 'Аккаунт заблокирован после множественных неудачных попыток',
+                'locked': True,
+                'remaining_seconds': remaining,
+                'message': f'Попробуйте через {minutes} мин {seconds} сек'
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
+
     # Проверяем логин/пароль
     user = authenticate(username=username, password=password)
-    
+
     if user is None:
+        # Записываем неудачную попытку
+        record_failed_attempt(username, ip_address)
+        
+        # Проверяем, не заблокировались ли мы после этой попытки
+        is_locked, remaining = check_lockout(username, ip_address)
+        if is_locked:
+            minutes = remaining // 60
+            seconds = remaining % 60
+            return Response(
+                {
+                    'error': 'Превышено максимальное количество попыток',
+                    'locked': True,
+                    'remaining_seconds': remaining,
+                    'message': f'Аккаунт заблокирован. Попробуйте через {minutes} мин {seconds} сек'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         return Response(
             {'error': 'Неверный логин или пароль'},
             status=status.HTTP_401_UNAUTHORIZED
         )
-    
+
+    # Успешный вход — сбрасываем попытки
+    reset_failed_attempts(username)
+
+    # Логин пользователя (создаём сессию)
+    login(request, user)
+
     # Генерируем токены
     refresh = RefreshToken.for_user(user)
     refresh['username'] = user.username
     refresh['email'] = user.email
-    
+
     return Response({
         'tokens': {
             'refresh': str(refresh),
@@ -337,6 +456,24 @@ def login_view(request):
         },
         'user': UserSerializer(user).data
     })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def logout_view(request):
+    """
+    Выход пользователя (уничтожение сессии).
+    """
+    logout(request)
+    return Response({'message': 'Вы успешно вышли'})
+
+
+@api_view(['GET'])
+def csrf_token_view(request):
+    """
+    Получить CSRF токен.
+    """
+    return Response({'csrfToken': request.META.get('CSRF_COOKIE')})
 
 
 @api_view(['POST'])

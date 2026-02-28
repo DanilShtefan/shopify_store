@@ -103,3 +103,38 @@ class WishlistItem(models.Model):
 
     def __str__(self):
         return self.product.name
+
+
+class FailedLoginAttempt(models.Model):
+    """
+    Отслеживание неудачных попыток входа для защиты от брутфорса.
+    Блокировка происходит по username и/или IP адресу.
+    """
+    username = models.CharField(max_length=150, db_index=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    failed_attempts = models.PositiveIntegerField(default=1)
+    last_attempt = models.DateTimeField(auto_now=True)
+    locked_until = models.DateTimeField(null=True, blank=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Неудачная попытка входа"
+        verbose_name_plural = "Неудачные попытки входа"
+        ordering = ['-last_attempt']
+
+    def __str__(self):
+        return f"{self.username} - {self.failed_attempts} попыток"
+
+    def is_locked(self):
+        """Проверка, заблокирован ли аккаунт сейчас"""
+        if not self.locked_until:
+            return False
+        from django.utils import timezone
+        return timezone.now() < self.locked_until
+
+    def get_lockout_remaining(self):
+        """Оставшееся время блокировки в секундах"""
+        if not self.locked_until:
+            return 0
+        from django.utils import timezone
+        delta = self.locked_until - timezone.now()
+        return max(0, int(delta.total_seconds()))

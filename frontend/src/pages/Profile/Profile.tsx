@@ -7,7 +7,7 @@ import { LogoutButton } from '../../components/ui/LogoutButton/LogoutButton';
 import './Profile.css';
 
 export function Profile() {
-  const { user, logout, updateUser, error, clearError } = useContext(AuthContext);
+  const { user, logout, updateUser, error, clearError, isAuthenticated, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
@@ -20,9 +20,15 @@ export function Profile() {
   });
 
   useEffect(() => {
-    if (!user) {
+    // Не редиректим во время загрузки
+    if (loading) {
+      return;
+    }
+    
+    // Если не авторизованы - редирект на логин
+    if (!isAuthenticated) {
       navigate('/login');
-    } else {
+    } else if (user) {
       setFormData({
         username: user.username || '',
         email: user.email || '',
@@ -31,7 +37,7 @@ export function Profile() {
       });
       setFieldErrors({});
     }
-  }, [user, navigate]);
+  }, [user, navigate, loading, isAuthenticated]);
 
   // Очищаем ошибки при уходе со страницы
   useEffect(() => {

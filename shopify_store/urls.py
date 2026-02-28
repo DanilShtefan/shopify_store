@@ -11,9 +11,11 @@ from store.views import (
     wishlist_detail,
     wishlist_add_item,
     wishlist_remove_item,
-    # JWT авторизация
+    # Авторизация
     register_view,
     login_view,
+    logout_view,
+    csrf_token_view,
     token_refresh_view,
     profile_view,
     profile_update_view,
@@ -38,9 +40,11 @@ urlpatterns = [
     path('api/wishlist/<str:session_id>/add/', wishlist_add_item, name='wishlist_add_item'),
     path('api/wishlist/<str:session_id>/remove/<int:item_id>/', wishlist_remove_item, name='wishlist_remove_item'),
 
-    # === JWT АВТОРИЗАЦИЯ ===
+    # === АВТОРИЗАЦИЯ ===
     path('api/auth/register/', register_view, name='register'),
     path('api/auth/login/', login_view, name='login'),
+    path('api/auth/logout/', logout_view, name='logout'),
+    path('api/auth/csrf/', csrf_token_view, name='csrf_token'),
     path('api/auth/token/refresh/', token_refresh_view, name='token_refresh'),
     path('api/auth/profile/', profile_view, name='profile'),
     path('api/auth/profile/update/', profile_update_view, name='profile_update'),

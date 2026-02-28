@@ -22,6 +22,13 @@ export function Register() {
   const toastContext = useContext(ToastContext);
   const navigate = useNavigate();
 
+  // Если уже авторизован - редирект на главную
+  useEffect(() => {
+    if (authContext?.isAuthenticated) {
+      navigate('/');
+    }
+  }, [authContext?.isAuthenticated, navigate]);
+
   // Очищаем ошибку при монтировании
   useEffect(() => {
     authContext?.clearError();

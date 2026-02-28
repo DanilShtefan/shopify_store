@@ -39,12 +39,13 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
       'Content-Type': 'application/json',
       ...options?.headers,
     },
+    credentials: 'include', // Важно для cookies
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
     // Преобразуем объект в строку сразу
-    const errorMessage = typeof error === 'object' 
+    const errorMessage = typeof error === 'object'
       ? JSON.stringify(error)
       : String(error);
     throw new Error(errorMessage);
@@ -75,6 +76,24 @@ export const authService = {
   },
 
   /**
+   * Выход
+   */
+  logout: async (): Promise<{ message: string }> => {
+    return fetchApi<{ message: string }>('/auth/logout/', {
+      method: 'POST',
+    });
+  },
+
+  /**
+   * Получение CSRF токена
+   */
+  getCsrfToken: async (): Promise<{ csrfToken: string }> => {
+    return fetchApi<{ csrfToken: string }>('/auth/csrf/', {
+      method: 'GET',
+    });
+  },
+
+  /**
    * Обновление access токена
    */
   refreshToken: async (refresh: string): Promise<RefreshResponse> => {
@@ -87,12 +106,9 @@ export const authService = {
   /**
    * Получение профиля пользователя
    */
-  getProfile: async (accessToken: string): Promise<AuthResponse['user']> => {
+  getProfile: async (): Promise<AuthResponse['user']> => {
     return fetchApi<AuthResponse['user']>('/auth/profile/', {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
     });
   },
 
@@ -100,14 +116,10 @@ export const authService = {
    * Обновление профиля пользователя
    */
   updateProfile: async (
-    accessToken: string,
     data: Partial<AuthResponse['user']>
   ): Promise<AuthResponse['user']> => {
     return fetchApi<AuthResponse['user']>('/auth/profile/update/', {
       method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify(data),
     });
   },
