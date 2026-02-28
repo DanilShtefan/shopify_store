@@ -21,8 +21,8 @@ export function ProductDetail() {
     }
   };
 
-  const images = product && product.images && product.images.length > 0 
-    ? product.images 
+  const images = product && product.images && product.images.length > 0
+    ? product.images
     : [{ id: 0, url: product?.image ?? '', is_main: true }];
 
   const handleThumbnailClick = (index: number) => {
@@ -54,7 +54,7 @@ export function ProductDetail() {
       <div className="product-detail-content">
         <div className="product-detail-gallery">
           <div className="product-thumbnails">
-            {images.map((img, index) => (
+            {images.map((img, index: number) => (
               <button
                 key={img.id ?? index}
                 className={`thumbnail ${img.is_main ? 'active' : ''}`}
@@ -65,7 +65,7 @@ export function ProductDetail() {
             ))}
           </div>
           <div className="product-detail-images">
-            {images.map((img, index) => (
+            {images.map((img, index: number) => (
               <div
                 key={img.id ?? index}
                 id={`product-image-${index}`}

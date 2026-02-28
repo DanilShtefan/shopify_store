@@ -7,10 +7,6 @@ interface ProductListProps {
 }
 
 export function ProductList({ products }: ProductListProps) {
-    if(products.length === 0) {
-        return <div>Товары не найдены</div>;
-    }
-
     return <div className="product-list">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />

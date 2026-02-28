@@ -83,8 +83,20 @@ def category_detail(request, slug):
 
 @ensure_csrf_cookie
 def product_list(request):
-    """Список товаров с поддержкой фильтрации по категории"""
+    """Список товаров с поддержкой фильтрации по категории и пагинации"""
     category_slug = request.GET.get('category')
+    
+    # Параметры пагинации
+    try:
+        page = int(request.GET.get('page', 1))
+        per_page = int(request.GET.get('per_page', 12))
+    except (ValueError, TypeError):
+        page = 1
+        per_page = 12
+    
+    # Ограничения для per_page
+    per_page = max(1, min(per_page, 100))  # от 1 до 100
+    page = max(1, page)  # не меньше 1
     
     if category_slug:
         try:
@@ -95,10 +107,19 @@ def product_list(request):
                 category_ids.extend(cat.id for cat in category.children.all())
             products = Product.objects.filter(category_id__in=category_ids)
         except Category.DoesNotExist:
-            return JsonResponse({'products': [], 'error': 'Категория не найдена'})
+            return JsonResponse({'products': [], 'error': 'Категория не найдена', 'total': 0, 'page': page, 'per_page': per_page, 'total_pages': 0})
     else:
         products = Product.objects.all()
     
+    # Получаем общее количество
+    total = products.count()
+    
+    # Пагинация
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    products_page = products[start_idx:end_idx]
+    
+    # Формируем ответ
     data = [
         {
             'id': p.id,
@@ -118,9 +139,16 @@ def product_list(request):
                 'slug': p.category.slug,
             } if p.category else None,
         }
-        for p in products
+        for p in products_page
     ]
-    return JsonResponse({'products': data})
+    
+    return JsonResponse({
+        'products': data,
+        'total': total,
+        'page': page,
+        'per_page': per_page,
+        'total_pages': (total + per_page - 1) // per_page,
+    })
 
 @ensure_csrf_cookie
 def product_search(request):

@@ -9,15 +9,7 @@ import { useCart } from '../../hooks/useCart';
 export function Cart() {
   const { cart, loading, error, updateItem, removeItem } = useCart();
 
-  if (error) {
-    return (
-      <div className="error">
-        <p>Ошибка: {error}</p>
-        <BackButton />
-      </div>
-    );
-  }
-
+  // Показываем скелетоны во время загрузки
   if (loading) {
     return (
       <div className="cart-page">
@@ -48,6 +40,17 @@ export function Cart() {
     );
   }
 
+  // Показываем ошибку если есть
+  if (error) {
+    return (
+      <div className="error">
+        <p>Ошибка: {error}</p>
+        <BackButton />
+      </div>
+    );
+  }
+
+  // Показываем пустое состояние
   if (!cart || cart.items.length === 0) {
     return (
         <div>

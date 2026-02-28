@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useSearch } from '../../../hooks/useSearch';
+import { Skeleton } from '../Skeleton/Skeleton';
 import './SearchInputDesktop.css';
 
 export function SearchInputDesktop() {
@@ -61,7 +62,19 @@ export function SearchInputDesktop() {
     if (idsChanged) {
       // Обновляем контент только если изменились результаты
       if (loading) {
-        setDisplayContent(<div className="search-loading">Поиск...</div>);
+        setDisplayContent(
+          <ul className="search-list">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <li key={i} className="search-item search-item-skeleton">
+                <Skeleton variant="rectangular" width={60} height={60} className="skeleton-image" />
+                <div className="search-item-info">
+                  <Skeleton variant="text" className="skeleton-name" />
+                  <Skeleton variant="text" width={80} className="skeleton-price" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        );
       } else if (results.length === 0) {
         setDisplayContent(<div className="search-empty">Ничего не найдено</div>);
       } else {

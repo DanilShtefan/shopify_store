@@ -8,15 +8,7 @@ import { useWishlist } from '../../hooks/useWishlist';
 export function Wishlist() {
   const { wishlist, loading, error, removeFromWishlist } = useWishlist();
 
-  if (error) {
-    return (
-      <div className="error">
-        <p>Ошибка: {error}</p>
-        <BackButton />
-      </div>
-    );
-  }
-
+  // Показываем скелетоны во время загрузки
   if (loading) {
     return (
       <div className="wishlist-page">
@@ -37,6 +29,17 @@ export function Wishlist() {
     );
   }
 
+  // Показываем ошибку если есть
+  if (error) {
+    return (
+      <div className="error">
+        <p>Ошибка: {error}</p>
+        <BackButton />
+      </div>
+    );
+  }
+
+  // Показываем пустое состояние
   if (!wishlist || wishlist.items.length === 0) {
     return (
       <div>
