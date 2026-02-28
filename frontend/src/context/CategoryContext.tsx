@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback, type ReactNode, useEffect, useContext } from 'react';
+import { createContext, useState, useCallback, type ReactNode, useEffect } from 'react';
 import { categoryService, type Category } from '../services/categoryService';
 
 interface CategoryContextType {

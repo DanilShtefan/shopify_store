@@ -53,7 +53,7 @@ export async function fetchApi<T>(
 
   // Добавляем CSRF токен для безопасных методов
   if (csrfToken && options?.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
-    headers['X-CSRFToken'] = csrfToken;
+    (headers as Record<string, string>)['X-CSRFToken'] = csrfToken;
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {

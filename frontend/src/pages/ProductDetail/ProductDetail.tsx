@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useProduct } from '../../hooks/useProducts';
 import './ProductDetail.css';
 import { useCart } from '../../hooks/useCart';
@@ -10,7 +10,6 @@ export function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { cart, addToCart } = useCart();
   const { product, loading, error } = useProduct(slug ?? '');
-  const navigate = useNavigate();
 
   const cartItem = product ? cart?.items.find(item => item.product_id === product.id) : undefined;
   const inCartQuantity = cartItem?.quantity || 0;
@@ -22,7 +21,9 @@ export function ProductDetail() {
     }
   };
 
-  const images = product?.images?.length > 0 ? product.images : [{ id: 0, url: product?.image ?? '', is_main: true }];
+  const images = product && product.images && product.images.length > 0 
+    ? product.images 
+    : [{ id: 0, url: product?.image ?? '', is_main: true }];
 
   const handleThumbnailClick = (index: number) => {
     const element = document.getElementById(`product-image-${index}`);

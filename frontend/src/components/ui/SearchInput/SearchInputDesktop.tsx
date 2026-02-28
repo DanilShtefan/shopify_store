@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useSearch } from '../../../hooks/useSearch';
 import './SearchInputDesktop.css';
 

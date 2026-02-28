@@ -7,7 +7,13 @@ import { LogoutButton } from '../../components/ui/LogoutButton/LogoutButton';
 import './Profile.css';
 
 export function Profile() {
-  const { user, logout, updateUser, error, clearError, isAuthenticated, loading } = useContext(AuthContext);
+  const context = useContext(AuthContext);
+  
+  if (!context) {
+    throw new Error('Profile must be used within AuthProvider');
+  }
+  
+  const { user, logout, updateUser, error, clearError, isAuthenticated, loading } = context;
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});

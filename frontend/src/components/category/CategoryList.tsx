@@ -69,7 +69,7 @@ export function CategoryList() {
         </button>
 
         {categories.map((category) => {
-          const hasChildren = category.children && category.children.length > 0;
+          const hasChildren = !!(category.children && category.children.length > 0);
           const isCategoryExpanded = expandedCategory === category.slug;
           const isActive = selectedCategory === category.slug;
 
@@ -98,7 +98,7 @@ export function CategoryList() {
               </button>
 
               {/* Дочерние категории */}
-              {hasChildren && (
+              {hasChildren && category.children && (
                 <div className={`category-children ${isCategoryExpanded ? 'show' : ''}`}>
                   {category.children.map((child) => (
                     <button
