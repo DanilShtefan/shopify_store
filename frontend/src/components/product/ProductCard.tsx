@@ -6,6 +6,7 @@ import { useWishlist } from '../../hooks/useWishlist';
 import { Button } from '../ui/Button/Button';
 import { IconButton } from '../ui/IconButton/IconButton';
 import { useState } from 'react';
+import { Heart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -85,10 +86,13 @@ export function ProductCard({ product }: ProductCardProps) {
             onClick={handleToggleFavorite}
             aria-label={isInWishlist ? 'Удалить из избранного' : 'Добавить в избранное'}
           >
-            {isInWishlist ? '♥' : '♡'}
+            <Heart size={20} strokeWidth={2} fill={isInWishlist ? '#ef4444' : 'none'} />
           </IconButton>
         </div>
         <div className="product-info">
+          {product.category && (
+            <span className="product-category">{product.category.name}</span>
+          )}
           <h3 className="product-name">{product.name}</h3>
           <p className="product-description">{product.description}</p>
           <div className="product-footer">

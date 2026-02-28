@@ -22,7 +22,6 @@
 .search-desktop-btn {
   background: none;
   border: none;
-  font-size: 18px;
   cursor: pointer;
   padding: 8px;
   display: flex;
@@ -39,6 +38,11 @@
   opacity: 1;
   transform: scale(1);
   margin-right: 24px;
+  color: #333;
+}
+
+.search-desktop-btn:hover {
+  background: #f0f0f0;
 }
 
 .search-desktop-wrapper:not(.expanded) .search-desktop-btn {
@@ -130,6 +134,25 @@
   width: 100%;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.search-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #666;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-close-btn:hover {
+  background: #f0f0f0;
+  color: #000;
 }
 
 .search-desktop-input {

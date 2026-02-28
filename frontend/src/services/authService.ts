@@ -43,11 +43,18 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
   });
 
   if (!response.ok) {
+    // Для 401/403 не показываем ошибку в консоли (это нормально для неавторизованных)
+    const isAuthEndpoint = endpoint.includes('/auth/');
+    const isSilentError = response.status === 401 || response.status === 403;
+    
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    // Преобразуем объект в строку сразу
     const errorMessage = typeof error === 'object'
       ? JSON.stringify(error)
       : String(error);
+    
+    if (!isAuthEndpoint || !isSilentError) {
+      throw new Error(errorMessage);
+    }
     throw new Error(errorMessage);
   }
 

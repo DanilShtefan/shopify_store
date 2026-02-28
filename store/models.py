@@ -3,12 +3,59 @@ from django.utils.text import slugify
 
 # Create your models here.
 
+class Category(models.Model):
+    """
+    Категория товаров.
+    Поддерживает иерархию (родительские и дочерние категории).
+    """
+    name = models.CharField(max_length=100, verbose_name="Название")
+    slug = models.SlugField(unique=True, blank=True, verbose_name="Slug")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children',
+        verbose_name="Родительская категория"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+        ordering = ['name']
+    
+    def __str__(self):
+        # Показываем иерархию в названии
+        if self.parent:
+            return f"{self.parent.name} → {self.name}"
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def get_products_count(self):
+        """Получить количество товаров в категории"""
+        return self.products.count()
+
+
 class Product(models.Model):
     """"""
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        related_name='products',
+        null=True,
+        blank=True,
+        verbose_name="Категория"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(unique=True, blank=True)
 

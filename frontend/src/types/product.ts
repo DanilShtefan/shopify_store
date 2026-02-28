@@ -4,6 +4,12 @@ export interface ProductImage {
   is_main: boolean;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -13,4 +19,5 @@ export interface Product {
   image: string;
   images: ProductImage[];
   slug: string | undefined;
+  category: Category | null;
 }

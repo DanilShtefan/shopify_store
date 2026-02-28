@@ -17,12 +17,33 @@ function getCsrfToken(): string | null {
   return cookieValue;
 }
 
+// Получение CSRF токена с сервера (если нет в cookie)
+async function fetchCsrfToken(): Promise<string | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/csrf/`, {
+      credentials: 'include',
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.csrfToken || null;
+    }
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
+  }
+  return null;
+}
+
 export async function fetchApi<T>(
   endpoint: string,
   options?: RequestInit & { requireAuth?: boolean },
   requireAuth: boolean = false
 ): Promise<T> {
-  const csrfToken = getCsrfToken();
+  let csrfToken = getCsrfToken();
+  
+  // Если токена нет и это безопасный метод — пробуем получить
+  if (!csrfToken && options?.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
+    csrfToken = await fetchCsrfToken();
+  }
 
   // Формируем заголовки
   const headers: HeadersInit = {
@@ -43,6 +64,11 @@ export async function fetchApi<T>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
+
+    // Если 403 — возможно проблема с CSRF
+    if (response.status === 403) {
+      console.error('CSRF token missing or invalid. Error:', error);
+    }
 
     // Если токен 401 — пробуем обновить токен (опционально)
     if (response.status === 401 && requireAuth) {

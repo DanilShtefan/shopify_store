@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Search, X } from 'lucide-react';
 import { useSearch } from '../../../hooks/useSearch';
 import './SearchInputDesktop.css';
 
@@ -141,7 +142,7 @@ export function SearchInputDesktop() {
           onClick={handleExpand}
           aria-label="Поиск"
         >
-          🔍
+          <Search size={22} strokeWidth={2} />
         </button>
       )}
 

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import { useSearch } from '../../../hooks/useSearch';
 import './SearchInputMobile.css';
 
@@ -142,7 +143,7 @@ export function SearchInputMobile() {
         onClick={handleExpand}
         aria-label="Поиск"
       >
-        🔍
+        <Search size={22} strokeWidth={2} />
       </button>
 
       <div className={`search-mobile-input-wrapper ${isExpanded ? 'expanded' : ''}`}>

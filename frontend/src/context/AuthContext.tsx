@@ -44,7 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = await authService.getProfile();
         setUser(userData);
       } catch (e) {
-        // Не авторизован — очищаем данные
+        // Не авторизован — это нормально, просто очищаем данные
+        // 403/401 означает что пользователь не вошёл в систему
         setUser(null);
       }
       setLoading(false);

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Package, Heart, ShoppingCart, User } from 'lucide-react';
 import './Header.css';
 import { useCart } from '../../../hooks/useCart';
 import { useWishlist } from '../../../hooks/useWishlist';
@@ -14,24 +15,25 @@ export function Header() {
     <header className="header">
       <div className="header-container">
         <Link to="/" className="logo">
-          🛒 Shopify Store
+          <ShoppingCart size={24} strokeWidth={2} />
+          <span>Shopify Store</span>
         </Link>
         <div className="header-bottom">
           <SearchInput />
           <nav className="nav">
             <Link to="/" className="nav-link" title="Товары">
-              <span className="nav-icon">📦</span>
+              <Package size={20} strokeWidth={2} />
               <span className="nav-text">Товары</span>
             </Link>
             <Link to="/wishlist" className="nav-link" title="Избранное">
-              <span className="nav-icon">❤️</span>
+              <Heart size={20} strokeWidth={2} />
               <span className="nav-text">Избранное</span>
               <span className={`cart-badge ${wishlist && wishlist.items_count > 0 ? 'badge-visible' : 'badge-hidden'}`}>
                 {wishlist?.items_count || ''}
               </span>
             </Link>
             <Link to="/cart" className="nav-link" title="Корзина">
-              <span className="nav-icon">🛒</span>
+              <ShoppingCart size={20} strokeWidth={2} />
               <span className="nav-text">Корзина</span>
               <span className={`cart-badge ${cart && cart.items_count > 0 ? 'badge-visible' : 'badge-hidden'}`}>
                 {cart?.items_count || ''}
@@ -43,14 +45,14 @@ export function Header() {
               <Link to="/profile" className="user-info-link">
                 <div className="user-info">
                   <span className="user-avatar">
-                    {user?.username?.charAt(0).toUpperCase() || 'U'}
+                    <User size={18} strokeWidth={2} />
                   </span>
                   <span className="user-name">{user?.username}</span>
                 </div>
               </Link>
             ) : (
               <Link to="/login" className="nav-link" title="Вход">
-                <span className="nav-icon">👤</span>
+                <User size={20} strokeWidth={2} />
                 <span className="nav-text">Вход</span>
               </Link>
             )}

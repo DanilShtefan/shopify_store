@@ -1,0 +1,272 @@
+/* ========================================
+   CATEGORY LIST - БАЗОВЫЕ СТИЛИ
+   ======================================== */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 280px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* ========================================
+   ЗАГОЛОВОК (HEADER)
+   ======================================== */
+.category-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  transition: background 0.3s ease;
+}
+
+.category-list-header:hover {
+  background: linear-gradient(135deg, #2a2a2a 0%, #444 100%);
+}
+
+.category-header-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.category-header-text svg {
+  color: #fff;
+}
+
+.category-toggle-icon {
+  color: #fff;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-toggle-icon.category-toggle-expanded {
+  transform: rotate(180deg);
+}
+
+/* ========================================
+   КОНТЕНТ (ВЫПАДАЮЩИЙ СПИСОК)
+   ======================================== */
+.category-list-content {
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+  border-top: 1px solid #e8e8e8;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-list-content.show {
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.category-list_loading {
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  padding: 40px;
+}
+
+.category-skeleton {
+  color: #999;
+  font-size: 14px;
+}
+
+/* ========================================
+   КАТЕГОРИИ (ITEMS)
+   ======================================== */
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.category-item:hover {
+  background: #f0f0f0;
+  border-left-color: #ccc;
+}
+
+/* Активная категория (РОДИТЕЛЬСКАЯ) */
+.category-item-active:not(.category-item-child) {
+  background: linear-gradient(90deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.04) 100%);
+  border-left-color: #000;
+  color: #000;
+  font-weight: 600;
+}
+
+.category-item-active:not(.category-item-child):hover {
+  background: linear-gradient(90deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.06) 100%);
+}
+
+/* ========================================
+   ИКОНКИ В КАТЕГОРИЯХ
+   ======================================== */
+.category-item svg {
+  color: #000;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.category-item:hover svg {
+  transform: scale(1.1);
+}
+
+/* Активная родительская - иконки чёрные (фон светлый) */
+.category-item-active:not(.category-item-child) svg {
+  color: #000;
+}
+
+.category-item-active:not(.category-item-child):hover svg {
+  transform: scale(1.15);
+}
+
+/* ========================================
+   СТРЕЛКИ (Дочерние категории)
+   ======================================== */
+.category-arrow-icon {
+  color: #000;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  margin-left: auto;
+  display: block;
+}
+
+.category-arrow-icon.category-arrow-expanded {
+  transform: rotate(180deg) !important;
+}
+
+/* В активной родительской категории - стрелка чёрная (фон светлый) */
+.category-item-active:not(.category-item-child) .category-arrow-icon {
+  color: #000;
+}
+
+/* ========================================
+   СЧЁТЧИК ТОВАРОВ
+   ======================================== */
+.category-count {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.category-item:hover .category-count {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Активная родительская - счётчик чёрный (фон светлый) */
+.category-item-active:not(.category-item-child) .category-count {
+  background: rgba(0, 0, 0, 0.12);
+  color: #000;
+}
+
+/* ========================================
+   ДОЧЕРНИЕ КАТЕГОРИИ
+   ======================================== */
+.category-item-child {
+  padding-left: 52px;
+  font-size: 13px;
+  color: #555;
+}
+
+.category-item-child:hover {
+  background: #e8e8e8;
+}
+
+/* Иконки в дочерних - всегда чёрные */
+.category-item-child svg {
+  color: #000;
+}
+
+/* Активная дочерняя */
+.category-item-child.category-item-active {
+  background: linear-gradient(90deg, rgba(0,0,0,0.1) 0%, transparent 100%);
+  border-left-color: #000;
+  color: #000;
+  font-weight: 600;
+}
+
+.category-item-child.category-item-active svg {
+  color: #000;
+}
+
+.category-item-child.category-item-active .category-count {
+  background: rgba(0, 0, 0, 0.15);
+  color: #000;
+}
+
+/* Стрелка в дочерней - всегда чёрная */
+.category-item-child .category-arrow-icon,
+.category-item-child .category-arrow-icon.category-arrow-expanded {
+  color: #000;
+}
+
+/* ========================================
+   ВЫПАДАЮЩИЙ СПИСОК Дочерних
+   ======================================== */
+.category-children {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-children.show {
+  max-height: 500px;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   АДАПТИВНОСТЬ
+   ======================================== */
+@media (max-width: 979px) {
+  .category-list {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .category-list-header {
+    border-radius: 0;
+    padding: 16px;
+  }
+
+  .category-list-content {
+    border-top: none;
+  }
+}

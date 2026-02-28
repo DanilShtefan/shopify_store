@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { productService, type ProductDetailResponse } from '../services/productService';
 import type { Product } from '../types/product';
 
-export function useProducts() {
+export function useProducts(categorySlug?: string) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -10,7 +10,7 @@ export function useProducts() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const data = await productService.getAllProducts();
+        const data = await productService.getAllProducts(categorySlug);
         setProducts(data.products);
         setError(null);
       } catch (err) {
@@ -21,7 +21,7 @@ export function useProducts() {
     }
 
     fetchProducts();
-  }, []);
+  }, [categorySlug]);
 
   return { products, loading, error };
 }

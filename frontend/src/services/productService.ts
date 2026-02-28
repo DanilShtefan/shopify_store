@@ -12,11 +12,29 @@ export interface ProductDetailResponse {
   price: string;
   stock: number;
   image: string;
+  images: ProductImage[];
+  slug: string;
+  category: {
+    id: number;
+    name: string;
+    slug: string;
+  } | null;
+}
+
+interface ProductImage {
+  id: number;
+  url: string;
+  is_main: boolean;
 }
 
 export const productService = {
-    // Получаем все товары
-    getAllProducts: () => fetchApi<ProductListResponse>('/products/'),
+    // Получаем все товары (с опциональным фильтром по категории)
+    getAllProducts: (categorySlug?: string) => {
+        const endpoint = categorySlug 
+            ? `/products/?category=${categorySlug}`
+            : '/products/';
+        return fetchApi<ProductListResponse>(endpoint);
+    },
 
     // Получаем товар по slug
     getProductBySlug: (slug: string) => fetchApi<ProductDetailResponse>(`/products/${slug}/`),
