@@ -4,9 +4,24 @@ import { IconButton } from '../../components/ui/IconButton/IconButton';
 import { Button } from '../../components/ui/Button/Button';
 import { BackButton } from '../../components/ui/BackButton/BackButton';
 import { useCart } from '../../hooks/useCart';
+import { useState, useEffect } from 'react';
 
 export function Cart() {
   const { cart, loading, error, updateItem, removeItem } = useCart();
+  const [removingId, setRemovingId] = useState<number | null>(null);
+
+  // Скролл наверх сразу при монтировании
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleRemove = async (itemId: number) => {
+    setRemovingId(itemId);
+    // Ждём завершения анимации (300ms) перед удалением
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await removeItem(itemId);
+    setRemovingId(null);
+  };
 
   // Показываем индикатор загрузки
   if (loading) {
@@ -51,7 +66,10 @@ export function Cart() {
       <div className="cart-content">
         <div className="cart-items">
           {cart.items.map((item) => (
-            <div key={item.id} className="cart-item">
+            <div 
+              key={item.id} 
+              className={`cart-item ${removingId === item.id ? 'cart-item-removing' : ''}`}
+            >
               <div className="cart-item-image">
                 {item.product_image ? (
                   <img src={item.product_image} alt={item.product_name} />
@@ -94,7 +112,7 @@ export function Cart() {
 
                   <IconButton
                     variant="danger"
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => handleRemove(item.id)}
                     className="remove-btn"
                   >
                     ✕

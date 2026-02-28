@@ -3,9 +3,24 @@ import './Wishlist.css';
 import { IconButton } from '../../components/ui/IconButton/IconButton';
 import { BackButton } from '../../components/ui/BackButton/BackButton';
 import { useWishlist } from '../../hooks/useWishlist';
+import { useState, useEffect } from 'react';
 
 export function Wishlist() {
   const { wishlist, loading, error, removeFromWishlist } = useWishlist();
+  const [removingId, setRemovingId] = useState<number | null>(null);
+
+  // Скролл наверх сразу при монтировании
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleRemove = async (itemId: number) => {
+    setRemovingId(itemId);
+    // Ждём завершения анимации (300ms) перед удалением
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await removeFromWishlist(itemId);
+    setRemovingId(null);
+  };
 
   // Показываем индикатор загрузки
   if (loading) {
@@ -49,7 +64,10 @@ export function Wishlist() {
 
       <div className="wishlist-items">
         {wishlist.items.map((item) => (
-          <div key={item.id} className="wishlist-item">
+          <div 
+            key={item.id} 
+            className={`wishlist-item ${removingId === item.id ? 'wishlist-item-removing' : ''}`}
+          >
             <div className="wishlist-item-image">
               {item.product_image ? (
                 <img src={item.product_image} alt={item.product_name} />
@@ -75,7 +93,7 @@ export function Wishlist() {
 
             <IconButton
               variant="danger"
-              onClick={() => removeFromWishlist(item.id)}
+              onClick={() => handleRemove(item.id)}
             >
               ✕
             </IconButton>

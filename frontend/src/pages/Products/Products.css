@@ -1,7 +1,6 @@
 .products-page {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 24px 20px;
 }
 
 .products-layout {
@@ -13,9 +12,9 @@
 
 .products-sidebar {
   position: sticky;
-  top: 24px;
+  top: 80px;
   height: fit-content;
-  max-height: calc(100vh - 48px);
+  max-height: calc(100vh - 104px);
   overflow-y: auto;
 }
 
@@ -207,10 +206,6 @@
     box-shadow: none;
   }
 
-  .products-page {
-    padding: 16px 12px;
-  }
-
   .products-layout {
     gap: 0;
   }
@@ -238,9 +233,6 @@
 
 /* Очень маленькие экраны */
 @media (max-width: 480px) {
-  .products-page {
-    padding: 12px 8px;
-  }
 
   .products-header h1 {
     font-size: 20px;
