@@ -6,6 +6,7 @@ import { useAddress } from '../../hooks/useAddress';
 import { orderService } from '../../services/orderService';
 import { Button } from '../../components/ui/Button/Button';
 import { Input } from '../../components/ui/Input/Input';
+import { Checkbox } from '../../components/ui/Checkbox/Checkbox';
 import { PageLoader } from '../../components/ui/PageLoader/PageLoader';
 import { CheckCircle, AlertCircle, Package, MapPin, Phone, Mail } from 'lucide-react';
 import './Checkout.css';
@@ -17,7 +18,8 @@ export function Checkout() {
   const navigate = useNavigate();
 
   const cart = cartContext?.cart;
-  const clearCart = cartContext?.clearCart;
+  const removeSelectedItems = cartContext?.removeSelectedItems;
+  const selectedItems = cartContext?.selectedItems;
 
   const [loading, setLoading] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -58,7 +60,7 @@ export function Checkout() {
     }
   }, [addresses, selectedAddressId]);
 
-  // Если корзина пуста - редирект
+  // Если корзина пуста или нет выбранных товаров - редирект
   useEffect(() => {
     if (!cart || cart.items.length === 0) {
       navigate('/cart');
@@ -103,10 +105,12 @@ export function Checkout() {
         phone: formData.phone,
         email: formData.email,
         comment: formData.comment,
-        items: cart.items.map((item: { product_id: number; quantity: number }) => ({
-          product_id: item.product_id,
-          quantity: item.quantity,
-        })),
+        items: cart.items
+          .filter(item => selectedItems?.has(item.id))
+          .map((item: { product_id: number; quantity: number }) => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+          })),
       };
 
       const response = await orderService.createOrder(orderData);
@@ -116,8 +120,8 @@ export function Checkout() {
         total: response.total,
       });
 
-      // Очищаем корзину
-      await clearCart?.();
+      // Очищаем только выбранные товары из корзины
+      await removeSelectedItems?.();
 
       // Через 3 секунды редирект на страницу заказа
       setTimeout(() => {
@@ -326,29 +330,53 @@ export function Checkout() {
         {/* Правая колонка - заказ */}
         <div className="checkout-order-section">
           <div className="order-summary">
-            <h2 className="order-summary-title">
-              <Package size={20} />
-              Ваш заказ
-            </h2>
+            <div className="order-summary-header">
+              <h2 className="order-summary-title">
+                <Package size={20} />
+                Ваш заказ
+              </h2>
+              <Button
+                variant="outline"
+                size="small"
+                onClick={() => {
+                  if (cart && selectedItems?.size === cart.items.length) {
+                    cart.items.forEach(item => cartContext?.toggleItemSelection(item.id));
+                  } else {
+                    cartContext?.selectAllItems?.();
+                  }
+                }}
+              >
+                {cart && selectedItems?.size === cart.items.length ? 'Снять все' : 'Выбрать все'}
+              </Button>
+            </div>
 
             <div className="order-items">
-              {cart.items.map((item: { product_id: number; product_name: string; quantity: number; price: string; subtotal: string }) => (
-                <div key={item.product_id} className="order-item">
-                  <div className="order-item-info">
-                    <h4>{item.product_name}</h4>
-                    <p className="item-quantity">
-                      {item.quantity} шт. × {item.price} ₽
-                    </p>
+              {cart.items.map((item: { id: number; product_id: number; product_name: string; quantity: number; price: string; subtotal: string }) => {
+                const isSelected = selectedItems?.has(item.id);
+                return (
+                  <div key={item.id} className="order-item">
+                    <div className="order-item-top">
+                      <Checkbox
+                        checked={isSelected || false}
+                        onChange={() => cartContext?.toggleItemSelection(item.id)}
+                      />
+                      <p className="item-subtotal">{item.subtotal} ₽</p>
+                    </div>
+                    <div className="order-item-info">
+                      <h4>{item.product_name}</h4>
+                      <p className="item-quantity">
+                        {item.quantity} шт. × {item.price} ₽
+                      </p>
+                    </div>
                   </div>
-                  <p className="item-subtotal">{item.subtotal} ₽</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="order-totals">
               <div className="total-row">
-                <span>Товары ({cart.items_count} шт.)</span>
-                <span>{cart.total} ₽</span>
+                <span>Товары ({cart.items.filter(item => selectedItems?.has(item.id)).reduce((sum, item) => sum + item.quantity, 0)} шт.)</span>
+                <span>{cart.items.filter(item => selectedItems?.has(item.id)).reduce((sum, item) => sum + parseFloat(item.subtotal), 0).toFixed(2)} ₽</span>
               </div>
               <div className="total-row">
                 <span>Доставка</span>
@@ -356,7 +384,7 @@ export function Checkout() {
               </div>
               <div className="total-row total-row-grand">
                 <span>Итого</span>
-                <span>{cart.total} ₽</span>
+                <span>{cart.items.filter(item => selectedItems?.has(item.id)).reduce((sum, item) => sum + parseFloat(item.subtotal), 0).toFixed(2)} ₽</span>
               </div>
             </div>
           </div>

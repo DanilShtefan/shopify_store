@@ -233,6 +233,21 @@
   color: #667eea;
 }
 
+.order-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.order-summary-header .order-summary-title {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
 .order-items {
   display: flex;
   flex-direction: column;
@@ -245,11 +260,21 @@
 
 .order-item {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 12px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
   background: #f9f9fb;
   border-radius: 8px;
+}
+
+.order-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-item-info {
+  width: 100%;
 }
 
 .order-item-info h4 {

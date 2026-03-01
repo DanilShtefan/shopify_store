@@ -9,9 +9,34 @@
   margin-bottom: 24px;
 }
 
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.cart-selection-controls {
+  display: flex;
+  gap: 8px;
+}
+
 /* Плавное появление элементов корзины */
 .cart-item {
   animation: fadeInUp 0.4s ease-out backwards;
+  position: relative;
+}
+
+.cart-item-selected {
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+  border-color: #667eea;
+}
+
+.cart-item-select {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1;
 }
 
 .cart-item:nth-child(1) { animation-delay: 0.05s; }
@@ -314,6 +339,16 @@
   border-top: 1px solid #e0e0e0;
   font-size: 18px;
   font-weight: 700;
+}
+
+.selected-total {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.total-amount {
+  color: #10b981;
+  font-size: 24px;
 }
 
 .cart-empty {
