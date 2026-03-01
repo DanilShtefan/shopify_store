@@ -1,7 +1,6 @@
 .order-detail-container {
   min-height: 80vh;
   padding: 32px 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
 }
 
 .order-detail-card {
