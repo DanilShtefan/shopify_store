@@ -9,6 +9,7 @@ interface CartContextType {
   addToCart: (productId: number, quantity?: number) => Promise<boolean>;
   updateItem: (itemId: number, quantity: number) => Promise<boolean>;
   removeItem: (itemId: number) => Promise<boolean>;
+  clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
 }
 
@@ -75,12 +76,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [toastContext]);
 
+  const clearCart = useCallback(async () => {
+    try {
+      // Удаляем все товары из корзины по одному
+      const currentCart = await cartService.getCart();
+      if (currentCart && currentCart.items.length > 0) {
+        for (const item of currentCart.items) {
+          await cartService.removeItem(item.id);
+        }
+      }
+      setCart(null);
+    } catch (err) {
+      // Тихо игнорируем ошибки при очистке
+      console.error('Failed to clear cart:', err);
+      setCart(null);
+    }
+  }, []);
+
   useEffect(() => {
     refreshCart();
   }, [refreshCart]);
 
   return (
-    <CartContext.Provider value={{ cart, loading, error, addToCart, updateItem, removeItem, refreshCart }}>
+    <CartContext.Provider value={{ cart, loading, error, addToCart, updateItem, removeItem, clearCart, refreshCart }}>
       {children}
     </CartContext.Provider>
   );

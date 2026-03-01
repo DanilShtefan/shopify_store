@@ -16,6 +16,9 @@ const Wishlist = lazy(() => import('./pages/Wishlist/Wishlist').then(module => (
 const Profile = lazy(() => import('./pages/Profile/Profile').then(module => ({ default: module.Profile })));
 const Login = lazy(() => import('./pages/Auth/Login').then(module => ({ default: module.Login })));
 const Register = lazy(() => import('./pages/Auth/Register').then(module => ({ default: module.Register })));
+const Checkout = lazy(() => import('./pages/Checkout/Checkout').then(module => ({ default: module.Checkout })));
+const OrderDetail = lazy(() => import('./pages/OrderDetail/OrderDetail').then(module => ({ default: module.OrderDetail })));
+const Orders = lazy(() => import('./pages/Orders/Orders').then(module => ({ default: module.Orders })));
 
 // Обёртка для ленивой загрузки с ErrorBoundary и Suspense
 const LazyRoute = ({ children }: { children: React.ReactNode }) => (
@@ -34,6 +37,9 @@ function App() {
         <Route path="/" element={<LazyRoute><Products /></LazyRoute>} />
         <Route path="/products/:slug" element={<LazyRoute><ProductDetail /></LazyRoute>} />
         <Route path="/cart" element={<LazyRoute><Cart /></LazyRoute>} />
+        <Route path="/checkout" element={<LazyRoute><Checkout /></LazyRoute>} />
+        <Route path="/orders/:orderNumber" element={<LazyRoute><OrderDetail /></LazyRoute>} />
+        <Route path="/orders" element={<LazyRoute><Orders /></LazyRoute>} />
         <Route path="/wishlist" element={<LazyRoute><Wishlist /></LazyRoute>} />
         <Route path="/profile" element={<LazyRoute><Profile /></LazyRoute>} />
         <Route path="/login" element={<LazyRoute><Login /></LazyRoute>} />

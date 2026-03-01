@@ -1,0 +1,284 @@
+.order-detail-container {
+  min-height: 80vh;
+  padding: 32px 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+}
+
+.order-detail-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.order-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 20px;
+}
+
+.order-number-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-number-wrapper h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.order-number-wrapper svg {
+  color: #667eea;
+}
+
+.order-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.order-status svg {
+  flex-shrink: 0;
+}
+
+/* Дата заказа */
+.order-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.order-date svg {
+  color: #999;
+}
+
+/* Секции */
+.order-section {
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-section:last-of-type {
+  border-bottom: none;
+}
+
+.order-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.order-section-title svg {
+  color: #667eea;
+}
+
+/* Товары */
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px;
+  background: #f9f9fb;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.order-item:hover {
+  background: #f0f0f5;
+}
+
+.order-item-info {
+  flex: 1;
+}
+
+.item-name {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.item-name:hover {
+  color: #667eea;
+}
+
+.item-details {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.item-subtotal {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+/* Адрес */
+.order-address {
+  padding: 16px;
+  background: #f9f9fb;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+}
+
+/* Контакты */
+.order-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.contact-row svg {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.contact-row strong {
+  color: #333;
+}
+
+/* Итого */
+.order-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: #f9f9fb;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #666;
+}
+
+.total-row-grand {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  padding-top: 12px;
+  border-top: 2px solid #e0e0e0;
+  margin-top: 8px;
+}
+
+/* Кнопки */
+.order-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Ошибка */
+.order-error {
+  max-width: 500px;
+  margin: 80px auto;
+  text-align: center;
+  padding: 48px 32px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.order-error svg {
+  color: #ccc;
+  margin-bottom: 24px;
+}
+
+.order-error h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.order-error p {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+  .order-detail-container {
+    padding: 20px 16px;
+  }
+
+  .order-detail-card {
+    padding: 20px 16px;
+  }
+
+  .order-detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .order-number-wrapper h1 {
+    font-size: 20px;
+  }
+
+  .order-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .item-subtotal {
+    margin-left: 0;
+  }
+
+  .order-actions {
+    flex-direction: column;
+  }
+
+  .order-actions .btn {
+    width: 100%;
+  }
+}

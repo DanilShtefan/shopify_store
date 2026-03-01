@@ -26,6 +26,12 @@ export const Header = memo(function Header() {
               <Package size={20} strokeWidth={2} />
               <span className="nav-text">Товары</span>
             </Link>
+            {isAuthenticated === true && (
+              <Link to="/orders" className="nav-link" title="Заказы">
+                <Package size={20} strokeWidth={2} />
+                <span className="nav-text">Заказы</span>
+              </Link>
+            )}
             <Link to="/wishlist" className="nav-link" title="Избранное">
               <Heart size={20} strokeWidth={2} />
               <span className="nav-text">Избранное</span>

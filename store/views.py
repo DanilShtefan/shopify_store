@@ -12,7 +12,8 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import RefreshToken
-from .forms import RegisterSerializer, UserSerializer
+from .forms import RegisterSerializer, UserSerializer, OrderCreateSerializer
+from .models import Order, OrderItem
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 
@@ -759,3 +760,123 @@ def address_delete(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
     except Address.DoesNotExist:
         return Response({'error': 'Адрес не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# === ЗАКАЗЫ ===
+from .forms import OrderItemSerializer
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@ensure_csrf_cookie
+def order_create(request):
+    """
+    Оформление заказа.
+    Принимает: address_id, phone, email, comment, items (список товаров)
+    """
+    serializer = OrderCreateSerializer(
+        data=request.data,
+        context={'request': request}
+    )
+    
+    if serializer.is_valid():
+        data = serializer.validated_data
+        
+        # Получаем адрес
+        address = Address.objects.get(id=data['address_id'])
+        
+        # Считаем суммы
+        subtotal = 0
+        for item in data['items']:
+            product = Product.objects.get(id=item['product_id'])
+            subtotal += float(product.price) * item['quantity']
+        
+        # Создаём заказ
+        order = Order.objects.create(
+            user=request.user,
+            shipping_address=address,
+            phone=data['phone'],
+            email=data['email'],
+            comment=data.get('comment', ''),
+            subtotal=subtotal,
+            shipping_cost=0,  # Можно добавить логику доставки
+            total=subtotal,  # subtotal + shipping
+        )
+        
+        # Создаём позиции заказа
+        for item in data['items']:
+            product = Product.objects.get(id=item['product_id'])
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=item['quantity'],
+                price=product.price,
+            )
+            
+            # Уменьшаем количество товара на складе
+            product.stock -= item['quantity']
+            product.save()
+        
+        # Очищаем корзину пользователя (если есть)
+        from .models import Cart
+        try:
+            cart = Cart.objects.get(session_id=request.session.session_key)
+            cart.items.all().delete()
+        except (Cart.DoesNotExist, AttributeError):
+            pass
+        
+        # Возвращаем данные заказа
+        return Response({
+            'order_number': order.order_number,
+            'status': order.status,
+            'total': str(order.total),
+            'message': 'Заказ успешно оформлен!'
+        }, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def order_list(request):
+    """Список заказов пользователя"""
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    data = [{
+        'id': order.id,
+        'order_number': order.order_number,
+        'status': order.get_status_display(),
+        'total': str(order.total),
+        'created_at': order.created_at.isoformat(),
+        'items_count': order.items.count(),
+    } for order in orders]
+    return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def order_detail(request, order_number):
+    """Детальная информация о заказе"""
+    try:
+        order = Order.objects.get(order_number=order_number, user=request.user)
+        data = {
+            'order_number': order.order_number,
+            'status': order.get_status_display(),
+            'total': str(order.total),
+            'subtotal': str(order.subtotal),
+            'shipping_cost': str(order.shipping_cost),
+            'created_at': order.created_at.isoformat(),
+            'shipping_address': order.shipping_address_snapshot,
+            'phone': order.phone,
+            'email': order.email,
+            'comment': order.comment,
+            'items': [{
+                'product_id': item.product.id,
+                'product_name': item.product.name,
+                'product_slug': item.product.slug,
+                'quantity': item.quantity,
+                'price': str(item.price),
+                'subtotal': str(item.subtotal),
+            } for item in order.items.all()]
+        }
+        return Response(data)
+    except Order.DoesNotExist:
+        return Response({'error': 'Заказ не найден'}, status=status.HTTP_404_NOT_FOUND)

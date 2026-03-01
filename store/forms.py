@@ -121,3 +121,49 @@ class UserSerializer(serializers.ModelSerializer):
             'email': {'required': True},
             'username': {'required': True},
         }
+
+
+class OrderItemSerializer(serializers.Serializer):
+    """Сериализатор для позиции заказа"""
+    product_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class OrderCreateSerializer(serializers.Serializer):
+    """Сериализатор для создания заказа"""
+    address_id = serializers.IntegerField(required=True)
+    phone = serializers.CharField(max_length=20, required=True)
+    email = serializers.EmailField(required=True)
+    comment = serializers.CharField(required=False, allow_blank=True, default='')
+    items = OrderItemSerializer(many=True)
+    
+    def validate_address_id(self, value):
+        """Проверка существования адреса"""
+        from .models import Address
+        try:
+            address = Address.objects.get(id=value)
+            # Проверяем, что адрес принадлежит пользователю
+            if address.user != self.context['request'].user:
+                raise serializers.ValidationError('Адрес не найден')
+        except Address.DoesNotExist:
+            raise serializers.ValidationError('Адрес не найден')
+        return value
+    
+    def validate_items(self, items):
+        """Проверка наличия товаров на складе"""
+        from .models import Product, CartItem, Cart
+        
+        if not items:
+            raise serializers.ValidationError('Корзина пуста')
+        
+        for item in items:
+            try:
+                product = Product.objects.get(id=item['product_id'])
+                if product.stock < item['quantity']:
+                    raise serializers.ValidationError(
+                        f'Товар "{product.name}" недоступен в количестве {item["quantity"]}. На складе: {product.stock}'
+                    )
+            except Product.DoesNotExist:
+                raise serializers.ValidationError(f'Товар не найден')
+        
+        return items

@@ -242,3 +242,165 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.name}: {self.city}, {self.street}, {self.house}"
+
+
+class OrderStatus(models.TextChoices):
+    """Статусы заказа"""
+    PENDING = 'pending', 'Ожидает подтверждения'
+    CONFIRMED = 'confirmed', 'Подтверждён'
+    PROCESSING = 'processing', 'В обработке'
+    SHIPPED = 'shipped', 'Отправлен'
+    DELIVERED = 'delivered', 'Доставлен'
+    CANCELLED = 'cancelled', 'Отменён'
+
+
+class Order(models.Model):
+    """Заказ покупателя"""
+    user = models.ForeignKey(
+        'auth.User',
+        on_delete=models.CASCADE,
+        related_name='orders',
+        verbose_name="Пользователь"
+    )
+    order_number = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name="Номер заказа"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=OrderStatus.choices,
+        default=OrderStatus.PENDING,
+        verbose_name="Статус"
+    )
+    
+    # Адрес доставки
+    shipping_address = models.ForeignKey(
+        Address,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='orders',
+        verbose_name="Адрес доставки"
+    )
+    shipping_address_snapshot = models.TextField(
+        blank=True,
+        verbose_name="Копия адреса на момент заказа"
+    )
+    
+    # Контакты
+    phone = models.CharField(
+        max_length=20,
+        verbose_name="Телефон"
+    )
+    email = models.EmailField(
+        verbose_name="Email"
+    )
+    
+    # Суммы
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Сумма товаров"
+    )
+    shipping_cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name="Стоимость доставки"
+    )
+    total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Итого"
+    )
+    
+    # Комментарий
+    comment = models.TextField(
+        blank=True,
+        verbose_name="Комментарий к заказу"
+    )
+    
+    # Даты
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Дата обновления"
+    )
+
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Заказ #{self.order_number} ({self.user.username})"
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            # Генерируем номер заказа: ORD-YYYYMMDD-XXXX
+            from datetime import datetime
+            date_str = datetime.now().strftime('%Y%m%d')
+            last_order = Order.objects.filter(
+                order_number__startswith=f'ORD-{date_str}-'
+            ).order_by('-order_number').first()
+            
+            if last_order:
+                last_num = int(last_order.order_number.split('-')[-1])
+                new_num = last_num + 1
+            else:
+                new_num = 1
+            
+            self.order_number = f'ORD-{date_str}-{new_num:04d}'
+        
+        # Сохраняем копию адреса
+        if self.shipping_address and not self.shipping_address_snapshot:
+            addr = self.shipping_address
+            self.shipping_address_snapshot = (
+                f"{addr.city}, {addr.street}, {addr.house}"
+                f"{', ' + addr.apartment if addr.apartment else ''}"
+            )
+        
+        super().save(*args, **kwargs)
+
+
+class OrderItem(models.Model):
+    """Позиция заказа"""
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name="Заказ"
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name="Товар"
+    )
+    quantity = models.PositiveIntegerField(
+        default=1,
+        verbose_name="Количество"
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Цена на момент заказа"
+    )
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Сумма"
+    )
+
+    class Meta:
+        verbose_name = "Позиция заказа"
+        verbose_name_plural = "Позиции заказа"
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
+
+    def save(self, *args, **kwargs):
+        self.subtotal = float(self.price) * self.quantity
+        super().save(*args, **kwargs)

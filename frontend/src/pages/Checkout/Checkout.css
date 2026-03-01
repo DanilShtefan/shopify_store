@@ -1,0 +1,387 @@
+.checkout-container {
+  min-height: 80vh;
+  padding: 32px 20px;
+}
+
+.checkout-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+}
+
+/* Левая колонка - форма */
+.checkout-form-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 32px 0;
+}
+
+.checkout-section {
+  margin-bottom: 32px;
+}
+
+.checkout-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.checkout-section-title svg {
+  color: #667eea;
+}
+
+/* Адреса */
+.no-addresses {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f9f9fb;
+  border-radius: 12px;
+  color: #999;
+}
+
+.no-addresses svg {
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+.no-addresses p {
+  margin: 8px 0 16px 0;
+  font-size: 14px;
+}
+
+.addresses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.address-card {
+  padding: 16px;
+  background: #f9f9fb;
+  border: 2px solid #e8e8ed;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.address-card:hover {
+  border-color: #667eea;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.address-card.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.address-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.address-card-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.address-card-content {
+  margin: 8px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.address-card-phone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.address-card-phone svg {
+  color: #999;
+}
+
+/* Форма */
+.form-row {
+  margin-bottom: 16px;
+}
+
+.comment-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.comment-label svg {
+  color: #999;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.comment-textarea:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.field-error {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+.general-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.general-error svg {
+  flex-shrink: 0;
+}
+
+/* Правая колонка - заказ */
+.checkout-order-section {
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+}
+
+.order-summary {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.order-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.order-summary-title svg {
+  color: #667eea;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background: #f9f9fb;
+  border-radius: 8px;
+}
+
+.order-item-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.item-quantity {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.item-subtotal {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.order-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #666;
+}
+
+.total-row-grand {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Успешный заказ */
+.checkout-success {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 48px 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.success-icon {
+  color: #10b981;
+  margin-bottom: 24px;
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.success-text {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.success-total {
+  font-size: 18px;
+  color: #333;
+  margin: 24px 0 32px 0;
+  padding: 16px;
+  background: #f0fdf4;
+  border-radius: 8px;
+}
+
+.success-total strong {
+  color: #10b981;
+}
+
+.success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Адаптивность */
+@media (max-width: 900px) {
+  .checkout-content {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-order-section {
+    position: static;
+  }
+
+  .checkout-form-section,
+  .checkout-order-section {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .checkout-container {
+    padding: 20px 16px;
+  }
+
+  .checkout-form-section {
+    padding: 20px 16px;
+  }
+
+  .checkout-title {
+    font-size: 22px;
+  }
+
+  .checkout-section-title {
+    font-size: 16px;
+  }
+
+  .order-summary {
+    padding: 20px 16px;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+}

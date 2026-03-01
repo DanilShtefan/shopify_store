@@ -133,9 +133,11 @@ export function Cart() {
             <span>Общая сумма:</span>
             <span>${cart.total}</span>
           </div>
-          <Button variant="primary" size="large" fullWidth>
-            Оформить заказ
-          </Button>
+          <Link to="/checkout" style={{ textDecoration: 'none' }}>
+            <Button variant="primary" size="large" fullWidth>
+              Оформить заказ
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -26,6 +26,10 @@ from store.views import (
     token_refresh_view,
     profile_view,
     profile_update_view,
+    # Заказы
+    order_create,
+    order_list,
+    order_detail,
 )
 
 urlpatterns = [
@@ -64,4 +68,9 @@ urlpatterns = [
     path('api/addresses/create/', address_create, name='address_create'),
     path('api/addresses/<int:pk>/', address_update, name='address_update'),
     path('api/addresses/<int:pk>/delete/', address_delete, name='address_delete'),
+
+    # === ЗАКАЗЫ ===
+    path('api/orders/create/', order_create, name='order_create'),
+    path('api/orders/', order_list, name='order_list'),
+    path('api/orders/<str:order_number>/', order_detail, name='order_detail'),
 ]
