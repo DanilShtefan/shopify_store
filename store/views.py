@@ -41,47 +41,6 @@ def category_list(request):
     return JsonResponse({'categories': data})
 
 @ensure_csrf_cookie
-def category_detail(request, slug):
-    """Детали категории + товары в ней"""
-    try:
-        category = Category.objects.get(slug=slug)
-        
-        # Получаем товары категории (включая дочерние категории)
-        category_ids = [category.id]
-        if category.children.exists():
-            category_ids.extend(cat.id for cat in category.children.all())
-        
-        products = Product.objects.filter(category_id__in=category_ids)
-        
-        data = {
-            'id': category.id,
-            'name': category.name,
-            'slug': category.slug,
-            'description': category.description,
-            'products_count': products.count(),
-            'products': [
-                {
-                    'id': p.id,
-                    'name': p.name,
-                    'description': p.description,
-                    'price': str(p.price),
-                    'stock': p.stock,
-                    'image': p.get_main_image(),
-                    'slug': p.slug,
-                    'category': {
-                        'id': p.category.id,
-                        'name': p.category.name,
-                        'slug': p.category.slug,
-                    } if p.category else None,
-                }
-                for p in products
-            ],
-        }
-        return JsonResponse(data)
-    except Category.DoesNotExist:
-        return JsonResponse({'error': 'Категория не найдена'}, status=404)
-
-@ensure_csrf_cookie
 def product_list(request):
     """Список товаров с поддержкой фильтрации по категории и пагинации"""
     category_slug = request.GET.get('category')

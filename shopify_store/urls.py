@@ -13,7 +13,6 @@ from store.views import (
     wishlist_remove_item,
     # Категории
     category_list,
-    category_detail,
     # Авторизация
     register_view,
     login_view,
@@ -29,7 +28,6 @@ urlpatterns = [
 
     # Категории
     path('api/categories/', category_list, name='category_list'),
-    path('api/categories/<slug:slug>/', category_detail, name='category_detail'),
 
     # Товары
     path('api/products/', product_list, name='product_list'),
