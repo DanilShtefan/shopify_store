@@ -75,27 +75,77 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
   const { cart } = useCart();
   const { wishlist } = useWishlist();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [nextImageIndex, setNextImageIndex] = useState<number | null>(null);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
   const images = product.images.length > 0 ? product.images : [{ id: 0, url: product.image, is_main: true }];
+
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prev => new Set(prev).add(index));
+    // Если это следующее изображение - переключаемся
+    if (nextImageIndex === index) {
+      setCurrentImageIndex(index);
+      setNextImageIndex(null);
+    }
+  };
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    const prevIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1;
+    
+    if (loadedImages.has(prevIndex)) {
+      // Уже загружено - переключаем сразу
+      setCurrentImageIndex(prevIndex);
+    } else {
+      // Не загружено - начинаем загрузку, но не переключаем пока
+      setNextImageIndex(prevIndex);
+    }
   };
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    const nextIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1;
+    
+    if (loadedImages.has(nextIndex)) {
+      // Уже загружено - переключаем сразу
+      setCurrentImageIndex(nextIndex);
+    } else {
+      // Не загружено - начинаем загрузку, но не переключаем пока
+      setNextImageIndex(nextIndex);
+    }
   };
 
   return (
     <div className="product-card">
       <Link to={`/products/${product.slug}`} className="product-link">
         <div className="product-image">
-          {images[currentImageIndex]?.url ? (
-            <img src={images[currentImageIndex].url} alt={product.name} />
+          {images.length > 0 ? (
+            images.map((img, index) => {
+              // Показываем если: это активное ИЛИ загружено ИЛИ следующее на загрузку
+              const isActive = index === currentImageIndex;
+              const isNext = index === nextImageIndex;
+              const isLoaded = loadedImages.has(index);
+              
+              if (!isActive && !isLoaded && !isNext) {
+                return null;
+              }
+              
+              return (
+                <img
+                  key={img.id ?? index}
+                  src={img.url}
+                  alt={product.name}
+                  onLoad={() => handleImageLoad(index)}
+                  className={`product-image-slide ${isActive ? 'active' : ''}`}
+                  style={{
+                    display: 'block',
+                    opacity: isActive ? 1 : 0
+                  }}
+                />
+              );
+            })
           ) : (
             <div className="product-placeholder">Нет фото</div>
           )}

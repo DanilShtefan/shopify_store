@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProduct } from '../../hooks/useProducts';
 import './ProductDetail.css';
@@ -37,6 +37,11 @@ const AddToCartButton = memo(function AddToCartButton({ product }: { product: an
 export const ProductDetail = memo(function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { product, loading, error } = useProduct(slug ?? '');
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prev => new Set(prev).add(index));
+  };
 
   const images = product && product.images && product.images.length > 0
     ? product.images
@@ -96,7 +101,12 @@ export const ProductDetail = memo(function ProductDetail() {
                 id={`product-image-${index}`}
                 className="product-image-item"
               >
-                <img src={img.url} alt={`${product.name} ${index + 1}`} />
+                <img 
+                  src={img.url} 
+                  alt={`${product.name} ${index + 1}`}
+                  onLoad={() => handleImageLoad(index)}
+                  className={loadedImages.has(index) ? 'loaded' : 'loading'}
+                />
               </div>
             ))}
           </div>
