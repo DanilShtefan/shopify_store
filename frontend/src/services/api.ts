@@ -78,5 +78,10 @@ export async function fetchApi<T>(
     throw new Error(error.error || `HTTP ${response.status}`);
   }
 
+  // Для 204 No Content возвращаем пустой объект
+  if (response.status === 204) {
+    return {} as T;
+  }
+
   return response.json();
 }
