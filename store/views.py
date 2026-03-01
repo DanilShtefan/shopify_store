@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
 import json
-from .models import Product, Cart, CartItem, Wishlist, WishlistItem, ProductImage, FailedLoginAttempt, Category
+from .models import Product, Cart, CartItem, Wishlist, WishlistItem, ProductImage, FailedLoginAttempt, Category, Address
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -14,6 +14,58 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework_simplejwt.tokens import RefreshToken
 from .forms import RegisterSerializer, UserSerializer
 from django.conf import settings
+from django.http import HttpResponse, JsonResponse
+
+
+def set_jwt_cookies(response, access_token, refresh_token):
+    """
+    Устанавливает httpOnly cookie с JWT токенами.
+    """
+    cookie_settings = settings.JWT_AUTH_COOKIE
+
+    # Access token cookie
+    access_config = cookie_settings.get('access_token', {})
+    response.set_cookie(
+        key='access_token',
+        value=str(access_token),
+        httponly=access_config.get('httponly', True),
+        secure=access_config.get('secure', False),
+        samesite=access_config.get('samesite', 'Lax'),
+        max_age=access_config.get('max_age', 60 * 60),
+    )
+
+    # Refresh token cookie
+    refresh_config = cookie_settings.get('refresh_token', {})
+    response.set_cookie(
+        key='refresh_token',
+        value=str(refresh_token),
+        httponly=refresh_config.get('httponly', True),
+        secure=refresh_config.get('secure', False),
+        samesite=refresh_config.get('samesite', 'Lax'),
+        max_age=refresh_config.get('max_age', 60 * 60 * 24),
+    )
+
+    return response
+
+
+def clear_jwt_cookies(response):
+    """
+    Удаляет httpOnly cookie с JWT токенами.
+    """
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+    return response
+
+
+def json_response_with_cookies(data, cookies=None, status=200):
+    """
+    Создаёт JsonResponse с установленными cookie.
+    """
+    response = JsonResponse(data, status=status)
+    if cookies:
+        for name, value, options in cookies:
+            response.set_cookie(name, value, **options)
+    return response
 
 @ensure_csrf_cookie
 def category_list(request):
@@ -359,15 +411,15 @@ def wishlist_remove_item(request, session_id, item_id):
 @ensure_csrf_cookie
 def register_view(request):
     """
-    Регистрация пользователя + получение токенов.
+    Регистрация пользователя + установка JWT cookie.
     Принимает: username, password, password2, email
-    Возвращает: access, refresh токены + данные пользователя
+    Возвращает: данные пользователя
     """
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         # Создаём пользователя
         user = serializer.save()
-        
+
         # Автоматический логин после регистрации
         login(request, user)
 
@@ -376,13 +428,15 @@ def register_view(request):
         refresh['username'] = user.username
         refresh['email'] = user.email
 
-        return Response({
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            },
-            'user': UserSerializer(user).data
-        }, status=status.HTTP_201_CREATED)
+        access_token = refresh.access_token
+        
+        # Создаём ответ с данными пользователя
+        response = Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        
+        # Устанавливаем cookie с токенами
+        set_jwt_cookies(response, access_token, refresh)
+        
+        return response
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -460,8 +514,8 @@ def login_view(request):
     """
     Логин пользователя.
     Принимает: username, password
-    Возвращает: access, refresh токены
-    
+    Возвращает: данные пользователя + устанавливает JWT cookie
+
     Защита от брутфорса:
     - Блокировка после 5 неудачных попыток
     - Время блокировки: 15 минут
@@ -497,7 +551,7 @@ def login_view(request):
     if user is None:
         # Записываем неудачную попытку
         record_failed_attempt(username, ip_address)
-        
+
         # Проверяем, не заблокировались ли мы после этой попытки
         is_locked, remaining = check_lockout(username, ip_address)
         if is_locked:
@@ -512,7 +566,7 @@ def login_view(request):
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         return Response(
             {'error': 'Неверный логин или пароль'},
             status=status.HTTP_401_UNAUTHORIZED
@@ -529,23 +583,27 @@ def login_view(request):
     refresh['username'] = user.username
     refresh['email'] = user.email
 
-    return Response({
-        'tokens': {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        },
-        'user': UserSerializer(user).data
-    })
+    access_token = refresh.access_token
+    
+    # Создаём ответ с данными пользователя
+    response = Response(UserSerializer(user).data)
+    
+    # Устанавливаем cookie с токенами
+    set_jwt_cookies(response, access_token, refresh)
+    
+    return response
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def logout_view(request):
     """
-    Выход пользователя (уничтожение сессии).
+    Выход пользователя (очистка сессии и cookie).
     """
     logout(request)
-    return Response({'message': 'Вы успешно вышли'})
+    response = Response({'message': 'Вы успешно вышли'})
+    clear_jwt_cookies(response)
+    return response
 
 
 @api_view(['GET'])
@@ -559,25 +617,35 @@ def csrf_token_view(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@ensure_csrf_cookie
 def token_refresh_view(request):
     """
     Обновление access токена.
-    Принимает: refresh токен
-    Возвращает: новый access токен
+    Получает refresh токен из cookie и устанавливает новый access токен в cookie.
     """
-    refresh_token = request.data.get('refresh')
+    # Получаем refresh токен из cookie
+    refresh_token_str = request.COOKIES.get('refresh_token')
+
+    if not refresh_token_str:
+        # Пробуем получить из тела запроса (для обратной совместимости)
+        refresh_token_str = request.data.get('refresh')
     
-    if not refresh_token:
+    if not refresh_token_str:
         return Response(
             {'error': 'Refresh токен обязателен'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     try:
-        refresh = RefreshToken(refresh_token)
-        return Response({
-            'access': str(refresh.access_token)
-        })
+        refresh = RefreshToken(refresh_token_str)
+        access_token = refresh.access_token
+        
+        response = Response({'access': str(access_token)})
+        
+        # Обновляем access токен в cookie
+        set_jwt_cookies(response, access_token, refresh)
+        
+        return response
     except Exception as e:
         return Response(
             {'error': 'Неверный refresh токен'},
@@ -619,3 +687,75 @@ def profile_update_view(request):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# === АДРЕСА ===
+from rest_framework import serializers
+from django.views.decorators.csrf import csrf_exempt
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ['id', 'name', 'city', 'street', 'house', 'apartment', 'postal_code', 'phone', 'is_default']
+        read_only_fields = ['id']
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def address_list(request):
+    """Получить все адреса текущего пользователя."""
+    addresses = Address.objects.filter(user=request.user)
+    data = [{
+        'id': a.id,
+        'name': a.name,
+        'city': a.city,
+        'street': a.street,
+        'house': a.house,
+        'apartment': a.apartment,
+        'postal_code': a.postal_code,
+        'phone': a.phone,
+        'is_default': a.is_default,
+    } for a in addresses]
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def address_create(request):
+    """Добавить новый адрес."""
+    serializer = AddressSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def address_update(request, pk):
+    """Обновить адрес."""
+    try:
+        address = Address.objects.get(pk=pk, user=request.user)
+    except Address.DoesNotExist:
+        return Response({'error': 'Адрес не найден'}, status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = AddressSerializer(address, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def address_delete(request, pk):
+    """Удалить адрес."""
+    try:
+        address = Address.objects.get(pk=pk, user=request.user)
+        address.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Address.DoesNotExist:
+        return Response({'error': 'Адрес не найден'}, status=status.HTTP_404_NOT_FOUND)

@@ -1,19 +1,28 @@
 .profile-container {
   min-height: 80vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 32px 20px;
 }
 
-.profile-card {
+/* ===========================================
+   МОБИЛЬНАЯ ВЕРСИЯ - единая карточка
+   =========================================== */
+.profile-card-single {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 450px;
+  max-width: 700px;
   overflow: hidden;
   animation: cardSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Скрываем мобильную версию на десктопе */
+@media (min-width: 900px) {
+  .profile-card-single {
+    display: none;
+  }
 }
 
 @keyframes cardSlideIn {
@@ -27,86 +36,264 @@
   }
 }
 
+/* Header с аватаром */
 .profile-header {
-  background: #000;
-  padding: 40px 24px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 32px 24px;
   text-align: center;
 }
 
 .profile-avatar-large {
-  width: 80px;
-  height: 80px;
-  background: #fff;
-  color: #000;
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   text-transform: uppercase;
-  margin: 0 auto 16px;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .profile-title {
   color: #fff;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   margin: 0;
 }
 
+/* Разделитель секций */
+.profile-section-divider {
+  padding: 16px 24px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.profile-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-subtitle svg {
+  color: #667eea;
+}
+
+/* Тело профиля */
 .profile-body {
-  padding: 24px;
+  padding: 20px 24px;
 }
 
 .profile-field {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .profile-field:last-child {
   margin-bottom: 0;
 }
 
-/* Скрываем/показываем инпуты при переключении */
-.profile-field .input-wrapper .input-field:disabled {
-  background: #f5f5f5;
-  border-color: transparent;
-  cursor: default;
-  opacity: 1;
+.profile-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
-.profile-field .input-wrapper .input-field:disabled::placeholder {
-  color: transparent;
-}
-
-/* Плавное появление при включении режима редактирования */
-.profile-field .input-wrapper .input-field:not(:disabled):not(.input-has-error) {
-  animation: profileInputFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* При ошибке - только transition, без анимации */
-.profile-field .input-wrapper.input-has-error .input-field {
-  animation: none;
-}
-
-@keyframes profileInputFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Footer с кнопками */
 .profile-footer {
   padding: 16px 24px 24px;
   display: flex;
   gap: 12px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .profile-footer .btn,
 .profile-footer .logout-btn {
   flex: 1;
+}
+
+/* Секция адресов внутри профиля */
+.profile-addresses-inline {
+  padding: 0 24px 24px;
+}
+
+.profile-addresses-inline .addresses-section {
+  margin-top: 0;
+}
+
+.profile-addresses-inline .addresses-header {
+  display: none;
+}
+
+.profile-addresses-inline .addresses-list {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.profile-addresses-inline .address-item {
+  padding: 16px;
+  background: #f9f9fb;
+  border: 1px solid #e8e8ed;
+}
+
+.profile-addresses-inline .address-item:hover {
+  border-color: #667eea;
+  background: #fff;
+}
+
+/* ===========================================
+   ДЕСКТОПНАЯ ВЕРСИЯ - две колонки
+   =========================================== */
+.profile-card-desktop {
+  display: none;
+  width: 100%;
+  max-width: 1200px;
+  gap: 24px;
+}
+
+/* Показываем десктоп версию только на экранах от 900px */
+@media (min-width: 900px) {
+  .profile-card-desktop {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    align-items: start;
+  }
+  
+  .profile-card-single {
+    display: none;
+  }
+}
+
+.profile-left-col,
+.profile-right-col {
+  animation: cardSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-left-col {
+  position: sticky;
+  top: 24px;
+}
+
+/* Карточка профиля для десктопа */
+.profile-card-desktop .profile-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.profile-card-desktop .profile-header {
+  padding: 40px 32px;
+}
+
+.profile-card-desktop .profile-avatar-large {
+  width: 96px;
+  height: 96px;
+  font-size: 40px;
+}
+
+.profile-card-desktop .profile-title {
+  font-size: 26px;
+}
+
+.profile-card-desktop .profile-body {
+  padding: 24px 32px;
+}
+
+.profile-card-desktop .profile-field {
+  margin-bottom: 20px;
+}
+
+.profile-card-desktop .profile-footer {
+  padding: 20px 32px 24px;
+  gap: 16px;
+}
+
+/* Карточка адресов для десктопа */
+.addresses-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  overflow: hidden;
+}
+
+.addresses-card .addresses-section {
+  margin-top: 0;
+}
+
+.addresses-card .addresses-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.addresses-card .addresses-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.addresses-card .addresses-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.addresses-card .address-item {
+  padding: 18px;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 640px) {
+  .profile-container {
+    padding: 20px 16px;
+  }
+  
+  .profile-card-single {
+    border-radius: 12px;
+  }
+  
+  .profile-header {
+    padding: 24px 16px;
+  }
+  
+  .profile-avatar-large {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .profile-title {
+    font-size: 18px;
+  }
+  
+  .profile-body {
+    padding: 16px;
+  }
+  
+  .profile-field-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .profile-footer {
+    padding: 12px 16px 16px;
+    flex-direction: column;
+  }
+  
+  .profile-section-divider {
+    padding: 12px 16px 0;
+  }
+  
+  .profile-addresses-inline {
+    padding: 0 16px 16px;
+  }
 }

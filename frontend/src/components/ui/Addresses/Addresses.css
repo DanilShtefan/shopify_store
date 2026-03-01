@@ -1,0 +1,196 @@
+.addresses-section {
+  margin-top: 0;
+}
+
+.addresses-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.addresses-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.addresses-title svg {
+  color: #667eea;
+}
+
+.add-address-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.addresses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* На десктопе в карточке адресов - сетка */
+.addresses-card .addresses-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.address-item {
+  background: #f9f9fb;
+  border: 1px solid #e8e8ed;
+  border-radius: 10px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.address-item:hover {
+  background: #fff;
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.address-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e8e8ed;
+}
+
+.address-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.address-name-icon {
+  color: #667eea;
+}
+
+.address-item-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.address-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.address-item-content {
+  margin-bottom: 14px;
+}
+
+.address-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.address-line svg {
+  color: #999;
+  flex-shrink: 0;
+}
+
+.address-line:first-child {
+  color: #333;
+  font-weight: 500;
+}
+
+.address-item-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.address-form-container {
+  margin-bottom: 16px;
+}
+
+.address-form-container .address-form {
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid #e8e8ed;
+  background: #fff;
+}
+
+.addresses-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  background: #f9f9fb;
+  border: 2px dashed #e0e0e0;
+  border-radius: 10px;
+}
+
+.addresses-empty-icon {
+  color: #ccc;
+  margin-bottom: 12px;
+}
+
+.addresses-empty p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.addresses-empty p:first-child {
+  font-size: 15px;
+  color: #666;
+  font-weight: 500;
+}
+
+.address-item-skeleton {
+  background: #f9f9fb;
+  border: 1px solid #e8e8ed;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Анимация появления */
+@keyframes addressCardAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.address-item {
+  animation: addressCardAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}

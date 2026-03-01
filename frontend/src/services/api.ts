@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = '/api';
 
 // Получение CSRF токена из cookie
 function getCsrfToken(): string | null {
@@ -39,7 +39,7 @@ export async function fetchApi<T>(
   requireAuth: boolean = false
 ): Promise<T> {
   let csrfToken = getCsrfToken();
-  
+
   // Если токена нет и это безопасный метод — пробуем получить
   if (!csrfToken && options?.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
     csrfToken = await fetchCsrfToken();
@@ -51,7 +51,7 @@ export async function fetchApi<T>(
     ...options?.headers,
   };
 
-  // Добавляем CSRF токен для безопасных методов
+  // Добавляем CSRF токен для POST/PUT/DELETE/PATCH запросов
   if (csrfToken && options?.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
     (headers as Record<string, string>)['X-CSRFToken'] = csrfToken;
   }
@@ -59,20 +59,20 @@ export async function fetchApi<T>(
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
-    credentials: 'include', // Важно для отправки cookies
+    credentials: 'include', // Важно для отправки cookie с JWT
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
 
-    // Если 403 — возможно проблема с CSRF
+    // Если 403 — возможно проблема с CSRF или авторизацией
     if (response.status === 403) {
-      console.error('CSRF token missing or invalid. Error:', error);
+      console.error('CSRF token missing or invalid, or authentication required. Error:', error);
     }
 
-    // Если токен 401 — пробуем обновить токен (опционально)
+    // Если 401 — проблема с авторизацией
     if (response.status === 401 && requireAuth) {
-      console.warn('Token expired or invalid');
+      console.warn('Authentication required');
     }
 
     throw new Error(error.error || `HTTP ${response.status}`);

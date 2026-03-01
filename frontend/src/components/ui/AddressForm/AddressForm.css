@@ -1,0 +1,124 @@
+.address-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  animation: formSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes formSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.address-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.address-form-row-inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.address-form-row-inline > * {
+  flex: 1;
+  min-width: 120px;
+}
+
+.address-form .input-wrapper {
+  background: #f9f9fb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.address-form .input-wrapper:hover {
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.address-form .input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.address-form .input-field {
+  font-size: 14px;
+  color: #333;
+}
+
+.address-form .input-field::placeholder {
+  color: #aaa;
+}
+
+.address-form .input-error {
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.address-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid #e8e8ed;
+}
+
+.address-form-actions .btn {
+  font-size: 13px;
+  padding: 8px 18px;
+}
+
+.address-form-actions .btn--outline {
+  border-color: #ccc;
+  color: #666;
+}
+
+.address-form-actions .btn--primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+.address-form-actions .btn--primary:hover {
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+  .address-form {
+    padding: 16px;
+  }
+  
+  .address-form-row-inline {
+    flex-direction: column;
+  }
+  
+  .address-form-row-inline > * {
+    min-width: 100%;
+  }
+  
+  .address-form-actions {
+    flex-direction: column;
+  }
+  
+  .address-form-actions .btn {
+    width: 100%;
+  }
+}

@@ -1,13 +1,5 @@
 import { createContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import { authService, type LoginData, type RegisterData } from '../services/authService';
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-}
+import { authService, type LoginData, type RegisterData, type User } from '../services/authService';
 
 interface AuthContextType {
   user: User | null;
@@ -91,8 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const login = useCallback(async (data: LoginData): Promise<boolean> => {
     try {
-      const response = await authService.login(data);
-      setUser(response.user);
+      const user = await authService.login(data);
+      setUser(user);
       setError(null);
       return true;
     } catch (error) {
@@ -129,8 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const register = useCallback(async (data: RegisterData): Promise<boolean> => {
     try {
-      const response = await authService.register(data);
-      setUser(response.user);
+      const user = await authService.register(data);
+      setUser(user);
       setError(null);
       return true;
     } catch (error) {

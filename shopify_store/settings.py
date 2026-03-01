@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'store.middleware.JWTAuthMiddleware',  # JWT аутентификация через cookie
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -147,6 +148,22 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+# Настройки для JWT cookie (httpOnly)
+JWT_AUTH_COOKIE = {
+    'access_token': {
+        'httponly': True,
+        'secure': False,  # True для production с HTTPS
+        'samesite': 'Lax',  # Lax для локальной разработки
+        'max_age': 60 * 60,  # 1 час (как ACCESS_TOKEN_LIFETIME)
+    },
+    'refresh_token': {
+        'httponly': True,
+        'secure': False,  # True для production с HTTPS
+        'samesite': 'Lax',  # Lax для локальной разработки
+        'max_age': 60 * 60 * 24,  # 1 день (как REFRESH_TOKEN_LIFETIME)
+    },
+}
+
 # Настройки безопасности - защита от брутфорса
 ACCOUNT_LOCKOUT = {
     'MAX_ATTEMPTS': 5,           # Максимум попыток до блокировки
@@ -168,11 +185,12 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Настройки cookie
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False  # True для HTTPS в production
+SESSION_COOKIE_SECURE = False  # True для production с HTTPS
 SESSION_COOKIE_HTTPONLY = True
 
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False  # True для HTTPS в production
-CSRF_COOKIE_HTTPONLY = False  # Должен быть False для доступа из JS
-CSRF_COOKIE_DOMAIN = None  # Важно: None для localhost
+CSRF_COOKIE_SECURE = False  # True для production с HTTPS
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_DOMAIN = None

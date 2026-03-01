@@ -13,6 +13,11 @@ from store.views import (
     wishlist_remove_item,
     # Категории
     category_list,
+    # Адреса
+    address_list,
+    address_create,
+    address_update,
+    address_delete,
     # Авторизация
     register_view,
     login_view,
@@ -53,4 +58,10 @@ urlpatterns = [
     path('api/auth/token/refresh/', token_refresh_view, name='token_refresh'),
     path('api/auth/profile/', profile_view, name='profile'),
     path('api/auth/profile/update/', profile_update_view, name='profile_update'),
+    
+    # === АДРЕСА ===
+    path('api/addresses/', address_list, name='address_list'),
+    path('api/addresses/create/', address_create, name='address_create'),
+    path('api/addresses/<int:pk>/', address_update, name='address_update'),
+    path('api/addresses/<int:pk>/delete/', address_delete, name='address_delete'),
 ]

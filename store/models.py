@@ -185,3 +185,60 @@ class FailedLoginAttempt(models.Model):
         from django.utils import timezone
         delta = self.locked_until - timezone.now()
         return max(0, int(delta.total_seconds()))
+
+
+class Address(models.Model):
+    """Адрес доставки пользователя"""
+    user = models.ForeignKey(
+        'auth.User',
+        on_delete=models.CASCADE,
+        related_name='addresses',
+        verbose_name="Пользователь"
+    )
+    name = models.CharField(
+        max_length=100,
+        verbose_name="Название адреса",
+        help_text="Например: Дом, Работа, Дача"
+    )
+    city = models.CharField(
+        max_length=100,
+        verbose_name="Город"
+    )
+    street = models.CharField(
+        max_length=200,
+        verbose_name="Улица"
+    )
+    house = models.CharField(
+        max_length=20,
+        verbose_name="Дом"
+    )
+    apartment = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Квартира/Офис"
+    )
+    postal_code = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Почтовый индекс"
+    )
+    phone = models.CharField(
+        max_length=20,
+        verbose_name="Телефон для связи"
+    )
+    is_default = models.BooleanField(
+        default=False,
+        verbose_name="Адрес по умолчанию"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата добавления"
+    )
+
+    class Meta:
+        verbose_name = "Адрес"
+        verbose_name_plural = "Адреса"
+        ordering = ['-is_default', '-created_at']
+
+    def __str__(self):
+        return f"{self.name}: {self.city}, {self.street}, {self.house}"

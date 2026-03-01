@@ -1,4 +1,12 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+import { fetchApi } from './api';
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
 
 export interface RegisterData {
   username: string;
@@ -14,80 +22,46 @@ export interface LoginData {
   password: string;
 }
 
-export interface AuthResponse {
-  tokens: {
-    refresh: string;
-    access: string;
-  };
-  user: {
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-  };
-}
+// Сервер возвращает сразу данные пользователя (без обёртки)
+export type AuthResponse = User;
 
 export interface RefreshResponse {
   access: string;
 }
 
-async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-    credentials: 'include', // Важно для cookies
-  });
-
-  if (!response.ok) {
-    // Для 401/403 не показываем ошибку в консоли (это нормально для неавторизованных)
-    const isAuthEndpoint = endpoint.includes('/auth/');
-    const isSilentError = response.status === 401 || response.status === 403;
-    
-    const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    const errorMessage = typeof error === 'object'
-      ? JSON.stringify(error)
-      : String(error);
-    
-    if (!isAuthEndpoint || !isSilentError) {
-      throw new Error(errorMessage);
-    }
-    throw new Error(errorMessage);
-  }
-
-  return response.json();
-}
-
 export const authService = {
   /**
    * Регистрация пользователя
+   * Токены автоматически устанавливаются в httpOnly cookie сервером
    */
   register: async (data: RegisterData): Promise<AuthResponse> => {
     return fetchApi<AuthResponse>('/auth/register/', {
       method: 'POST',
       body: JSON.stringify(data),
+      credentials: 'include',
     });
   },
 
   /**
    * Логин пользователя
+   * Токены автоматически устанавливаются в httpOnly cookie сервером
    */
   login: async (data: LoginData): Promise<AuthResponse> => {
     return fetchApi<AuthResponse>('/auth/login/', {
       method: 'POST',
       body: JSON.stringify(data),
+      credentials: 'include',
     });
   },
 
   /**
    * Выход
+   * Сервер очищает cookie
    */
   logout: async (): Promise<{ message: string }> => {
     return fetchApi<{ message: string }>('/auth/logout/', {
       method: 'POST',
+      credentials: 'include',
     });
   },
 
@@ -97,25 +71,29 @@ export const authService = {
   getCsrfToken: async (): Promise<{ csrfToken: string }> => {
     return fetchApi<{ csrfToken: string }>('/auth/csrf/', {
       method: 'GET',
+      credentials: 'include',
     });
   },
 
   /**
    * Обновление access токена
+   * Refresh токен берётся из cookie, новый access токен устанавливается в cookie
    */
-  refreshToken: async (refresh: string): Promise<RefreshResponse> => {
+  refreshToken: async (): Promise<RefreshResponse> => {
     return fetchApi<RefreshResponse>('/auth/token/refresh/', {
       method: 'POST',
-      body: JSON.stringify({ refresh }),
+      credentials: 'include',
     });
   },
 
   /**
    * Получение профиля пользователя
+   * JWT токен автоматически читается из cookie middleware на сервере
    */
-  getProfile: async (): Promise<AuthResponse['user']> => {
-    return fetchApi<AuthResponse['user']>('/auth/profile/', {
+  getProfile: async (): Promise<User> => {
+    return fetchApi<User>('/auth/profile/', {
       method: 'GET',
+      credentials: 'include',
     });
   },
 
@@ -123,11 +101,12 @@ export const authService = {
    * Обновление профиля пользователя
    */
   updateProfile: async (
-    data: Partial<AuthResponse['user']>
-  ): Promise<AuthResponse['user']> => {
-    return fetchApi<AuthResponse['user']>('/auth/profile/update/', {
+    data: Partial<User>
+  ): Promise<User> => {
+    return fetchApi<User>('/auth/profile/update/', {
       method: 'PUT',
       body: JSON.stringify(data),
+      credentials: 'include',
     });
   },
 };
