@@ -195,10 +195,30 @@ class Address(models.Model):
         related_name='addresses',
         verbose_name="Пользователь"
     )
-    name = models.CharField(
-        max_length=100,
-        verbose_name="Название адреса",
-        help_text="Например: Дом, Работа, Дача"
+    
+    # Тип адреса
+    ADDRESS_TYPE_CHOICES = [
+        ('apartment', 'Квартира'),
+        ('house', 'Частный дом'),
+    ]
+    address_type = models.CharField(
+        max_length=20,
+        choices=ADDRESS_TYPE_CHOICES,
+        default='apartment',
+        verbose_name="Тип адреса"
+    )
+    
+    # Полный адрес одной строкой (от DaData)
+    address_full = models.TextField(
+        verbose_name="Адрес",
+        help_text="Введите адрес через автозаполнение",
+        default=''
+    )
+    
+    # Структурированные поля (заполняются автоматически из DaData)
+    postal_code = models.CharField(
+        max_length=20,
+        verbose_name="Почтовый индекс"
     )
     city = models.CharField(
         max_length=100,
@@ -217,11 +237,8 @@ class Address(models.Model):
         blank=True,
         verbose_name="Квартира/Офис"
     )
-    postal_code = models.CharField(
-        max_length=20,
-        blank=True,
-        verbose_name="Почтовый индекс"
-    )
+    
+    # Телефон для связи
     phone = models.CharField(
         max_length=20,
         verbose_name="Телефон для связи"
@@ -241,7 +258,7 @@ class Address(models.Model):
         ordering = ['-is_default', '-created_at']
 
     def __str__(self):
-        return f"{self.name}: {self.city}, {self.street}, {self.house}"
+        return f"{self.city}, {self.street}, {self.house}"
 
 
 class OrderStatus(models.TextChoices):

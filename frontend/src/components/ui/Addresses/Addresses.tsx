@@ -8,12 +8,13 @@ import { MapPin, Home, Phone, Mail, Edit, Trash2, Plus } from 'lucide-react';
 import './Addresses.css';
 
 interface AddressFormData {
-  name: string;
+  address_type: 'apartment' | 'house';
+  address_full: string;
+  postal_code: string;
   city: string;
   street: string;
   house: string;
   apartment: string;
-  postal_code: string;
   phone: string;
 }
 
@@ -106,7 +107,8 @@ export function Addresses() {
               {editingId === address.id ? (
                 <AddressForm
                   initialData={{
-                    name: address.name,
+                    address_type: address.address_type,
+                    address_full: address.address_full,
                     city: address.city,
                     street: address.street,
                     house: address.house,
@@ -121,8 +123,13 @@ export function Addresses() {
                 <>
                   <div className="address-item-header">
                     <div className="address-name-wrapper">
+                      {address.address_type === 'house' ? (
+                        <span className="address-type-icon">🏡</span>
+                      ) : (
+                        <span className="address-type-icon">🏢</span>
+                      )}
                       <MapPin size={16} className="address-name-icon" />
-                      <h3>{address.name}</h3>
+                      <h3>{address.address_full}</h3>
                     </div>
                     {address.is_default && (
                       <span className="address-badge">По умолчанию</span>
@@ -132,7 +139,7 @@ export function Addresses() {
                     <p className="address-line">
                       <Home size={14} />
                       {address.city}, {address.street}, {address.house}
-                      {address.apartment && `, ${address.apartment}`}
+                      {address.address_type === 'apartment' && address.apartment && `, кв ${address.apartment}`}
                     </p>
                     {address.postal_code && (
                       <p className="address-line">

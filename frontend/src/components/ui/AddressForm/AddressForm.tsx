@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Button } from '../Button/Button';
 import { Input } from '../Input/Input';
+import { AddressAutocomplete } from '../AddressAutocomplete/AddressAutocomplete';
 import './AddressForm.css';
 
 interface AddressFormData {
-  name: string;
+  address_type: 'apartment' | 'house';
+  address_full: string;
+  postal_code: string;
   city: string;
   street: string;
   house: string;
   apartment: string;
-  postal_code: string;
   phone: string;
 }
 
@@ -21,12 +23,13 @@ interface AddressFormProps {
 
 export function AddressForm({ initialData, onSubmit, onCancel }: AddressFormProps) {
   const [formData, setFormData] = useState<AddressFormData>({
-    name: initialData?.name || '',
+    address_type: initialData?.address_type || 'apartment',
+    address_full: initialData?.address_full || '',
+    postal_code: initialData?.postal_code || '',
     city: initialData?.city || '',
     street: initialData?.street || '',
     house: initialData?.house || '',
     apartment: initialData?.apartment || '',
-    postal_code: initialData?.postal_code || '',
     phone: initialData?.phone || '',
   });
   const [loading, setLoading] = useState(false);
@@ -34,11 +37,20 @@ export function AddressForm({ initialData, onSubmit, onCancel }: AddressFormProp
 
   const validate = () => {
     const newErrors: Partial<AddressFormData> = {};
-    if (!formData.name) newErrors.name = 'Введите название';
-    if (!formData.city) newErrors.city = 'Введите город';
-    if (!formData.street) newErrors.street = 'Введите улицу';
-    if (!formData.house) newErrors.house = 'Введите дом';
-    if (!formData.phone) newErrors.phone = 'Введите телефон';
+    
+    if (!formData.address_full) {
+      newErrors.address_full = 'Введите адрес';
+    }
+    
+    if (!formData.phone) {
+      newErrors.phone = 'Введите телефон';
+    }
+    
+    // Для квартиры обязательна квартира/офис
+    if (formData.address_type === 'apartment' && !formData.apartment) {
+      newErrors.apartment = 'Введите номер квартиры';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -46,7 +58,7 @@ export function AddressForm({ initialData, onSubmit, onCancel }: AddressFormProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    
+
     setLoading(true);
     await onSubmit(formData);
     setLoading(false);
@@ -61,69 +73,148 @@ export function AddressForm({ initialData, onSubmit, onCancel }: AddressFormProp
     }
   };
 
+  const handleAddressSelect = (address: {
+    city: string;
+    street: string;
+    house: string;
+    postal_code: string;
+    apartment: string;
+  }) => {
+    const address_full = `${address.city}, ${address.street}, ${address.house}${address.apartment ? ', кв ' + address.apartment : ''}`;
+    
+    setFormData(prev => ({
+      ...prev,
+      address_full,
+      city: address.city,
+      street: address.street,
+      house: address.house,
+      postal_code: address.postal_code,
+      // Квартира заполняется только для квартир
+      apartment: isApartment ? (address.apartment || '') : '',
+    }));
+    
+    // Очищаем ошибки
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.address_full;
+      delete newErrors.city;
+      delete newErrors.street;
+      delete newErrors.house;
+      return newErrors;
+    });
+  };
+
+  const isApartment = formData.address_type === 'apartment';
+  const isHouse = formData.address_type === 'house';
+
   return (
     <form className="address-form" onSubmit={handleSubmit}>
-      <div className="address-form-row">
-        <Input
-          label="Название"
-          type="text"
-          placeholder="Дом, Работа, Дача"
-          value={formData.name}
-          onChange={handleChange('name')}
-          error={errors.name}
-          disabled={loading}
-        />
+      {/* Переключатель типа адреса */}
+      <div className="address-type-selector">
+        <label className={`address-type-option ${isApartment ? 'selected' : ''}`}>
+          <input
+            type="radio"
+            name="address_type"
+            value="apartment"
+            checked={isApartment}
+            onChange={() => setFormData(prev => ({ ...prev, address_type: 'apartment', apartment: '' }))}
+            disabled={loading}
+          />
+          <span className="address-type-label">🏢 Квартира</span>
+        </label>
+        
+        <label className={`address-type-option ${isHouse ? 'selected' : ''}`}>
+          <input
+            type="radio"
+            name="address_type"
+            value="house"
+            checked={isHouse}
+            onChange={() => setFormData(prev => ({ ...prev, address_type: 'house', apartment: '' }))}
+            disabled={loading}
+          />
+          <span className="address-type-label">🏡 Частный дом</span>
+        </label>
       </div>
 
       <div className="address-form-row">
-        <Input
-          label="Город"
-          type="text"
-          placeholder="Москва"
-          value={formData.city}
-          onChange={handleChange('city')}
-          error={errors.city}
+        <label className="address-form-label">
+          Адрес
+        </label>
+        <AddressAutocomplete
+          onAddressSelect={handleAddressSelect}
+          placeholder="Начните вводить адрес (город, улица...)"
           disabled={loading}
+          addressType={formData.address_type}
         />
+        {errors.address_full && (
+          <p className="address-form-error">{errors.address_full}</p>
+        )}
       </div>
 
-      <div className="address-form-row">
-        <Input
-          label="Улица"
-          type="text"
-          placeholder="ул. Пушкина"
-          value={formData.street}
-          onChange={handleChange('street')}
-          error={errors.street}
-          disabled={loading}
-        />
-      </div>
+      {/* Поля для квартиры */}
+      {isApartment && (
+        <div className="address-form-row address-form-row-inline">
+          <Input
+            label="Город"
+            type="text"
+            value={formData.city}
+            disabled
+            className="input-readonly"
+          />
+          <Input
+            label="Улица"
+            type="text"
+            value={formData.street}
+            disabled
+            className="input-readonly"
+          />
+        </div>
+      )}
+
+      {/* Поля для частного дома */}
+      {isHouse && (
+        <div className="address-form-row address-form-row-inline">
+          <Input
+            label="Город"
+            type="text"
+            value={formData.city}
+            disabled
+            className="input-readonly"
+          />
+          <Input
+            label="Улица"
+            type="text"
+            value={formData.street}
+            disabled
+            className="input-readonly"
+          />
+        </div>
+      )}
 
       <div className="address-form-row address-form-row-inline">
         <Input
           label="Дом"
           type="text"
-          placeholder="10"
           value={formData.house}
-          onChange={handleChange('house')}
-          error={errors.house}
-          disabled={loading}
+          disabled
+          className="input-readonly"
         />
-        <Input
-          label="Квартира"
-          type="text"
-          placeholder="25"
-          value={formData.apartment}
-          onChange={handleChange('apartment')}
-          disabled={loading}
-        />
+        {isApartment && (
+          <Input
+            label="Квартира"
+            type="text"
+            value={formData.apartment}
+            onChange={handleChange('apartment')}
+            disabled={loading || true}
+            className="input-readonly"
+          />
+        )}
         <Input
           label="Индекс"
           type="text"
-          placeholder="101000"
           value={formData.postal_code}
-          onChange={handleChange('postal_code')}
-          disabled={loading}
+          disabled
+          className="input-readonly"
         />
       </div>
 
@@ -140,18 +231,18 @@ export function AddressForm({ initialData, onSubmit, onCancel }: AddressFormProp
       </div>
 
       <div className="address-form-actions">
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="medium" 
+        <Button
+          type="button"
+          variant="outline"
+          size="medium"
           onClick={onCancel}
           disabled={loading}
         >
           Отмена
         </Button>
-        <Button 
-          type="submit" 
-          variant="primary" 
+        <Button
+          type="submit"
+          variant="primary"
           size="medium"
           disabled={loading}
         >

@@ -697,7 +697,7 @@ from django.views.decorators.csrf import csrf_exempt
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['id', 'name', 'city', 'street', 'house', 'apartment', 'postal_code', 'phone', 'is_default']
+        fields = ['id', 'address_type', 'address_full', 'postal_code', 'city', 'street', 'house', 'apartment', 'phone', 'is_default']
         read_only_fields = ['id']
 
 
@@ -708,7 +708,8 @@ def address_list(request):
     addresses = Address.objects.filter(user=request.user)
     data = [{
         'id': a.id,
-        'name': a.name,
+        'address_full': a.address_full,
+        'postal_code': a.postal_code,
         'city': a.city,
         'street': a.street,
         'house': a.house,

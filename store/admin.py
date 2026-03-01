@@ -129,13 +129,12 @@ class AdminOrderItem(admin.ModelAdmin):
 class AdminAddress(admin.ModelAdmin):
     list_display = (
         'user',
-        'name',
+        'address_full',
         'city',
-        'street',
-        'house',
         'phone',
         'is_default',
+        'created_at',
     )
     list_filter = ('is_default', 'city')
-    search_fields = ('user__username', 'city', 'street', 'phone')
+    search_fields = ('user__username', 'address_full', 'phone')
     ordering = ('-is_default', '-created_at')

@@ -230,7 +230,7 @@ export function Checkout() {
                       onClick={() => handleAddressSelect(address.id)}
                     >
                       <div className="address-card-header">
-                        <h3>{address.name}</h3>
+                        <h3>{address.address_full}</h3>
                         {address.is_default && (
                           <span className="badge">По умолчанию</span>
                         )}

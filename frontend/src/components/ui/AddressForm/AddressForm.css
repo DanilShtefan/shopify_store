@@ -19,10 +19,80 @@
   }
 }
 
+/* Переключатель типа адреса */
+.address-type-selector {
+  display: flex;
+  gap: 12px;
+  padding: 4px;
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.address-type-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.address-type-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.address-type-option:hover {
+  background: #f0f4ff;
+}
+
+.address-type-option.selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.address-type-option.selected .address-type-label {
+  color: #fff;
+}
+
+.address-type-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
 .address-form-row {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.address-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.address-form-error {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
 }
 
 .address-form-row-inline {
@@ -37,14 +107,8 @@
 }
 
 .address-form .input-wrapper {
-  background: #f9f9fb;
   border-radius: 8px;
   transition: all 0.2s ease;
-}
-
-.address-form .input-wrapper:hover {
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .address-form .input-label {

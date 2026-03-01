@@ -5,12 +5,13 @@ import { AuthContext } from './AuthContext';
 
 interface Address {
   id: number;
-  name: string;
+  address_type: 'apartment' | 'house';
+  address_full: string;
+  postal_code: string;
   city: string;
   street: string;
   house: string;
   apartment: string;
-  postal_code: string;
   phone: string;
   is_default: boolean;
 }

@@ -2,23 +2,25 @@ import { fetchApi } from './api';
 
 export interface Address {
   id: number;
-  name: string;
+  address_type: 'apartment' | 'house';
+  address_full: string;
+  postal_code: string;
   city: string;
   street: string;
   house: string;
   apartment: string;
-  postal_code: string;
   phone: string;
   is_default: boolean;
 }
 
 export interface CreateAddressData {
-  name: string;
+  address_type: 'apartment' | 'house';
+  address_full: string;
+  postal_code: string;
   city: string;
   street: string;
   house: string;
-  apartment?: string;
-  postal_code?: string;
+  apartment: string;
   phone: string;
   is_default?: boolean;
 }
